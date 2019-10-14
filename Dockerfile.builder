@@ -1,6 +1,7 @@
 FROM          debian:buster-slim                                                                          AS builder
 
 ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   BUILDPLATFORM
 ONBUILD ARG   NO_FAIL_OUTDATED
 
 ENV           GOLANG_VERSION=1.13.1

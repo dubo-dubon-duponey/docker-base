@@ -17,12 +17,7 @@ ENV           LC_ALL="C.UTF-8"
 RUN           apt-get update                                                                              > /dev/null \
               && apt-get install -y --no-install-recommends \
                 curl=7.64.0-4 \
-                ca-certificates=20190110                                                                  > /dev/null \
-              && apt-get -y autoremove                                                                    > /dev/null \
-              && apt-get -y clean            \
-              && rm -rf /var/lib/apt/lists/* \
-              && rm -rf /tmp/*               \
-              && rm -rf /var/tmp/*
+                ca-certificates=20190110                                                                  > /dev/null
 
 RUN           update-ca-certificates
 
@@ -63,6 +58,7 @@ RUN           apt-get install -y --no-install-recommends \
 
 # Python
 RUN           apt-get install -y --no-install-recommends \
+                python=2.7.16-1 \
                 virtualenv=15.1.0+ds-2                                                                    > /dev/null
 
 # This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.

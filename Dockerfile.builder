@@ -14,10 +14,16 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 
 # Install golang
-RUN           apt-get update                                                                              > /dev/null
-RUN           apt-get install -y --no-install-recommends \
+RUN           apt-get update                                                                              > /dev/null \
+              && apt-get install -y --no-install-recommends \
                 curl=7.64.0-4 \
-                ca-certificates=20190110                                                                  > /dev/null
+                ca-certificates=20190110                                                                  > /dev/null \
+              && apt-get -y autoremove                                                                    > /dev/null \
+              && apt-get -y clean            \
+              && rm -rf /var/lib/apt/lists/* \
+              && rm -rf /tmp/*               \
+              && rm -rf /var/tmp/*
+
 RUN           update-ca-certificates
 
 WORKDIR       /build/golang
@@ -90,12 +96,12 @@ ONBUILD RUN   set -eu; \
               done; \
               if [ "$candidate_minor" != "$minor" ]; then \
                 if [ "$candidate_minor" != "$((minor + 1))" ]; then \
-                  >&2 printf "WARNING: the version of golang you are using is badly outdated. The base image NEED to be updated to $major.$candidate_minor ASAP."; \
+                  >&2 printf "WARNING: the version of golang you are using is badly outdated. The base image NEED to be updated to %s.%s ASAP." "$major" "$candidate_minor"; \
                   if [ ! "$NO_FAIL_OUTDATED" ]; then \
                     exit 1; \
                   fi \
                 else \
-                  >&2 printf "WARNING: there is a new golang version $major.$candidate_minor - the base image should be updated to it soon."; \
+                  >&2 printf "WARNING: there is a new golang version %s.%s - the base image should be updated to it soon." "$major" "$candidate_minor"; \
                 fi \
               fi
 

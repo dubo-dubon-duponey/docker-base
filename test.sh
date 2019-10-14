@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if ! hadolint ./*Dockerfile*; then
+if ! hadolint --ignore DL4006 ./*Dockerfile*; then
   >&2 printf "Failed linting on Dockerfile\n"
   exit 1
 fi

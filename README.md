@@ -1,7 +1,8 @@
 # Base images
 
 This provides base images (builder and runtime) for all our images.
-Currently:
+
+Currently, on linux amd64, arm64, arm/v7, arm/v6:
 
  * `docker.io/dubodubonduponey/base:builder`
     * debian:buster-slim
@@ -13,3 +14,4 @@ Currently:
  * `docker.io/dubodubonduponey/base:runtime`
     * debian:buster-slim
     * golang, python, and essential dev & build tools
+    * nodejs + yarnpkg (except on arm/v6)

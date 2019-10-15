@@ -4,22 +4,25 @@ ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
 ONBUILD ARG   NO_FAIL_OUTDATED
 
-ENV           GOLANG_VERSION=1.13.1
-ENV           GOLANG_AMD64_SHA256=94f874037b82ea5353f4061e543681a0e79657f787437974214629af8407d124
-ENV           GOLANG_ARM64_SHA256=8af8787b7c2a3c0eb3f20f872577fcb6c36098bf725c59c4923921443084c807
-
-ENV           DEBIAN_FRONTEND="noninteractive"
-ENV           TERM="xterm"
-ENV           LANG="C.UTF-8"
-ENV           LC_ALL="C.UTF-8"
-
-# Install golang
 RUN           apt-get update                                                                              > /dev/null \
               && apt-get install -y --no-install-recommends \
                 curl=7.64.0-4 \
                 ca-certificates=20190110                                                                  > /dev/null
 
 RUN           update-ca-certificates
+
+ENV           DEBIAN_FRONTEND="noninteractive"
+ENV           TERM="xterm"
+ENV           LANG="C.UTF-8"
+ENV           LC_ALL="C.UTF-8"
+
+###########################################################
+# Golang
+###########################################################
+ENV           GOLANG_VERSION=1.13.1
+ENV           GOLANG_AMD64_SHA256=94f874037b82ea5353f4061e543681a0e79657f787437974214629af8407d124
+ENV           GOLANG_ARM64_SHA256=8af8787b7c2a3c0eb3f20f872577fcb6c36098bf725c59c4923921443084c807
+ENV           GOLANG_ARMV6_SHA256=7c75d4002321ea4a066dfe13f6dd5168076e9a231317c5afd55e78b86f478e37
 
 WORKDIR       /build/golang
 
@@ -28,8 +31,12 @@ RUN           set -eu; \
               case "${arch##*-}" in \
                 amd64) arch='linux-amd64'; checksum="$GOLANG_AMD64_SHA256" ;; \
                 arm64) arch='linux-arm64'; checksum="$GOLANG_ARM64_SHA256" ;; \
+            		armel) arch='linux-armv6l'; checksum="$GOLANG_ARMV6_SHA256" ;; \
+            		armhf) arch='linux-armv6l'; checksum="$GOLANG_ARMV6_SHA256" ;; \
+            		*) echo "unsupported architecture ${arch##*-}"; exit 1;; \
               esac; \
-              curl -fsSL -o go.tgz "https://dl.google.com/go/go${GOLANG_VERSION}.${arch}.tar.gz"; \
+              # XXX for some reason, debian certs are broken on armv67 - ignoring tls errors here for now - safeguarded by checksum verification
+              curl -k -fsSL -o go.tgz "https://dl.google.com/go/go${GOLANG_VERSION}.${arch}.tar.gz"; \
               printf "%s *go.tgz" "$checksum" | sha256sum -c -; \
               tar -xzf go.tgz; \
               rm go.tgz
@@ -56,10 +63,22 @@ RUN           apt-get install -y --no-install-recommends \
 RUN           apt-get install -y --no-install-recommends \
                 git=1:2.20.1-2                                                                            > /dev/null
 
+###########################################################
 # Python
+###########################################################
 RUN           apt-get install -y --no-install-recommends \
                 python=2.7.16-1 \
                 virtualenv=15.1.0+ds-2                                                                    > /dev/null
+
+###########################################################
+# Node
+###########################################################
+RUN           arch="$(dpkg --print-architecture)"; \
+              if [ "${arch##*-}" != "armel" ]; then \
+                apt-get install -y --no-install-recommends \
+                  nodejs=10.15.2~dfsg-2 \
+                  yarnpkg=1.13.0-1                                                                        > /dev/null; \
+              fi
 
 # This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
 ONBUILD RUN   set -eu; \

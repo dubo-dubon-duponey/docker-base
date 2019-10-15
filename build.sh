@@ -22,18 +22,18 @@ build::runtime(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.runtime --pull --target runtime \
     -t docker.io/dubodubonduponey/base:runtime \
-    --platform "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6" --push .
+    --platform "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6" --push "$@" .
 }
 
 build::builder(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.builder --pull --target builder \
     -t docker.io/dubodubonduponey/base:builder \
-    --platform "linux/amd64,linux/arm64" --push .
+    --platform "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6" --push "$@" .
 }
 
 docker::version_check || exit 1
-build::setup
+build::setup || exit 1
 
-build::builder
-build::runtime
+build::builder "$@" || exit 1
+build::runtime "$@"

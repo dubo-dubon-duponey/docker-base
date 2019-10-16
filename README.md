@@ -15,3 +15,9 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6:
     * debian:buster-slim
     * golang, python, and essential dev & build tools
     * nodejs + yarnpkg (except on arm/v6)
+
+# Caveats
+
+This is pretty bad: https://github.com/moby/qemu/issues/9
+
+Time to consider moving to alpine :s.

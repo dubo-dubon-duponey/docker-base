@@ -2,7 +2,7 @@ FROM          debian:buster-slim                                                
 
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   NO_FAIL_OUTDATED
+ONBUILD ARG   FAIL_WHEN_OUTDATED="true"
 
 RUN           apt-get update                                                                              > /dev/null \
               && apt-get install -y --no-install-recommends \
@@ -22,10 +22,10 @@ ENV           LC_ALL="C.UTF-8"
 ###########################################################
 # Golang
 ###########################################################
-ENV           GOLANG_VERSION=1.13.1
-ENV           GOLANG_AMD64_SHA256=94f874037b82ea5353f4061e543681a0e79657f787437974214629af8407d124
-ENV           GOLANG_ARM64_SHA256=8af8787b7c2a3c0eb3f20f872577fcb6c36098bf725c59c4923921443084c807
-ENV           GOLANG_ARMV6_SHA256=7c75d4002321ea4a066dfe13f6dd5168076e9a231317c5afd55e78b86f478e37
+ENV           GOLANG_VERSION 1.13.3
+ENV           GOLANG_AMD64_SHA256 0804bf02020dceaa8a7d7275ee79f7a142f1996bfd0c39216ccb405f93f994c0
+ENV           GOLANG_ARM64_SHA256 9fa65ae42665baff53802091b49b83af6f2e397986b6cbea2ae30e2c7ee0f2f2
+ENV           GOLANG_ARMV6_SHA256 9f15d6aa4098cd53ec5cb48d1a1e554d062b2263a03985d50c2568757d966dc6
 
 WORKDIR       /build/golang
 
@@ -154,7 +154,10 @@ ONBUILD RUN   set -eu; \
                 >&2 printf "ENV           GOLANG_AMD64_SHA256 %s\n" "${checksum%*-}"; \
                 checksum=$(curl -k -fsSL "https://dl.google.com/go/go$major.$minor.$candidate_patch.linux-arm64.tar.gz" | sha256sum); \
                 >&2 printf "ENV           GOLANG_ARM64_SHA256 %s\n" "${checksum%*-}"; \
-                if [ ! "$NO_FAIL_OUTDATED" ]; then \
+                checksum=$(curl -k -fsSL "https://dl.google.com/go/go$major.$minor.$candidate_patch.linux-armv6l.tar.gz" | sha256sum); \
+                >&2 printf "ENV           GOLANG_ARMV6_SHA256 %s\n" "${checksum%*-}"; \
+                if [ "$FAIL_WHEN_OUTDATED" ]; then \
+                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
                   exit 1; \
                 fi \
               fi; \
@@ -167,11 +170,45 @@ ONBUILD RUN   set -eu; \
               if [ "$candidate_minor" != "$minor" ]; then \
                 if [ "$candidate_minor" != "$((minor + 1))" ]; then \
                   >&2 printf "WARNING: the version of golang you are using is badly outdated. The base image NEED to be updated to %s.%s ASAP." "$major" "$candidate_minor"; \
-                  if [ ! "$NO_FAIL_OUTDATED" ]; then \
+                  if [ "$FAIL_WHEN_OUTDATED" ]; then \
+                    >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
                     exit 1; \
                   fi \
                 else \
                   >&2 printf "WARNING: there is a new golang version %s.%s - the base image should be updated to it soon." "$major" "$candidate_minor"; \
                 fi \
               fi
+
+ONBUILD RUN   set -eu; \
+              major=${NODE_VERSION%%.*}; \
+              rest=${NODE_VERSION#*.}; \
+              minor=${rest%%.*}; \
+              if [ "$rest" != "$minor" ]; then patch=${rest#*.}; fi; \
+              candidate_patch=${patch:-0}; \
+              next_patch=$((patch + 1)); \
+              while [ "$(curl -k -I -o /dev/null -v https://nodejs.org/dist/v$major.$minor.$next_patch/node-v$major.$minor.$next_patch-linux-arm64.tar.xz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
+                candidate_patch=$next_patch; \
+                next_patch=$((next_patch + 1)); \
+              done; \
+              if [ "$candidate_patch" != "${patch:-0}" ]; then \
+                >&2 printf "WARNING: node has a new patch version - the base image should DEFINITELY be updated to %s:\n" "$major.$minor.$candidate_patch"; \
+                if [ "$FAIL_WHEN_OUTDATED" ]; then \
+                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
+                  exit 1; \
+                fi \
+              fi; \
+              candidate_minor=$minor; \
+              next_minor=$((minor + 1)); \
+              while [ "$(curl -k -I -o /dev/null -v https://nodejs.org/dist/v$major.$next_minor.0/node-v$major.$next_minor.0-linux-arm64.tar.xz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
+                candidate_minor=$next_minor; \
+                next_minor=$((next_minor + 1)); \
+              done; \
+              if [ "$candidate_minor" != "$minor" ]; then \
+                >&2 printf "WARNING: the version of node you are using is outdated. The base image NEED to be updated to %s.%s.0 ASAP." "$major" "$candidate_minor"; \
+                if [ "$FAIL_WHEN_OUTDATED" ]; then \
+                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
+                  exit 1; \
+                fi \
+              fi
+
 

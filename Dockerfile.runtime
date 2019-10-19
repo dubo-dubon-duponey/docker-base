@@ -79,12 +79,16 @@ ONBUILD RUN   adduser --system --no-create-home --home /nonexistent --gecos "in 
                 dubo-dubon-duponey \
               && chmod 550 /boot/entrypoint.sh \
               && chown $BUILD_UID:root /boot/entrypoint.sh \
+              && mkdir -p /boot \
               && mkdir -p /config \
               && mkdir -p /data \
               && mkdir -p /certs \
+              && chown -R $BUILD_UID:root /boot \
               && chown -R $BUILD_UID:root /config \
               && chown -R $BUILD_UID:root /data \
               && chown -R $BUILD_UID:root /certs \
+              && find /boot -type d -exec chmod -R 770 {} \; \
+              && find /boot -type f -exec chmod -R 770 {} \; \
               && find /config -type d -exec chmod -R 770 {} \; \
               && find /config -type f -exec chmod -R 660 {} \; \
               && find /data   -type d -exec chmod -R 770 {} \; \

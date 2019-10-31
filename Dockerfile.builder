@@ -122,6 +122,10 @@ RUN           apt-get install -y --no-install-recommends \
                 gcc=4:8.3.0-1 \
                 libc6-dev=2.28-10 \
                 make=4.2.1-1.2 \
+                build-essential=12.6 \
+                autoconf=2.69-11 \
+                automake=1:1.16.1-4 \
+                libtool=2.4.6-9 \
 		            pkg-config=0.29-6                                                                         > /dev/null
 
 # Generic development stuff

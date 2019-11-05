@@ -1,64 +1,64 @@
-FROM          debian:buster-slim                                                                          AS builder
+ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+FROM          $DEBIAN                                                                                                   AS builder
 
-ONBUILD ARG   TARGETPLATFORM
-ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   FAIL_WHEN_OUTDATED="true"
-
-RUN           apt-get update                                                                              > /dev/null \
-              && apt-get install -y --no-install-recommends \
-                curl=7.64.0-4 \
-                xz-utils=5.2.4-1 \
-                gnupg=2.2.12-1+deb10u1 \
-                dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20190110                                                                  > /dev/null
-
-RUN           update-ca-certificates
+ARG           TARGETPLATFORM
 
 ENV           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
+ENV           TZ="America/Los_Angeles"
+
+RUN           apt-get update -qq \
+              && apt-get install -qq --no-install-recommends \
+                curl=7.64.0-4 \
+                gnupg=2.2.12-1+deb10u1 \
+                dirmngr=2.2.12-1+deb10u1 \
+                ca-certificates=20190110
+
+RUN           update-ca-certificates
 
 ###########################################################
 # Golang
 ###########################################################
-ENV           GOLANG_VERSION 1.13.3
-ENV           GOLANG_AMD64_SHA256 0804bf02020dceaa8a7d7275ee79f7a142f1996bfd0c39216ccb405f93f994c0
-ENV           GOLANG_ARM64_SHA256 9fa65ae42665baff53802091b49b83af6f2e397986b6cbea2ae30e2c7ee0f2f2
-ENV           GOLANG_ARMV6_SHA256 9f15d6aa4098cd53ec5cb48d1a1e554d062b2263a03985d50c2568757d966dc6
-
-WORKDIR       /build/golang
-
-RUN           set -eu; \
-              arch="$(dpkg --print-architecture)"; \
-              case "${arch##*-}" in \
-                amd64) arch='linux-amd64'; checksum="$GOLANG_AMD64_SHA256" ;; \
-                arm64) arch='linux-arm64'; checksum="$GOLANG_ARM64_SHA256" ;; \
-            		armel) arch='linux-armv6l'; checksum="$GOLANG_ARMV6_SHA256" ;; \
-            		armhf) arch='linux-armv6l'; checksum="$GOLANG_ARMV6_SHA256" ;; \
-            		*) echo "unsupported architecture ${arch##*-}"; exit 1;; \
-              esac; \
-              # XXX for some reason, debian certs are broken on armv67 - ignoring tls errors here for now - safeguarded by checksum verification
-              curl -k -fsSL -o go.tgz "https://dl.google.com/go/go${GOLANG_VERSION}.${arch}.tar.gz"; \
-              printf "%s *go.tgz" "$checksum" | sha256sum -c -; \
-              tar -xzf go.tgz; \
-              rm go.tgz
+ENV           GOLANG_VERSION 1.13.4
+ENV           GOLANG_AMD64_SHA512 bacaf9af8482fc3ca579fab1ef78a1646a846a736b7eb776328bbed430d2ef7d33abb2d4a4b0119378bb10efc33b813959654c04c0ef56e522b5bc8a817eada3
+ENV           GOLANG_ARM64_SHA512 786cdf2e9f1bed2e98679fdb12f6bb0a2add5c20bbd55cd95801b81d220f9091fbcc588e4ad939ccdf49c454d629e5cb0d686e3517a3d1267840e1959572d97c
+ENV           GOLANG_ARMV6L_SHA512 b9bd1e0ee9cf6fd0e5b03cf5a099352df62538be37e14798935c86a3d42e4c1e4a3a4118f32e29fd4ae212956533f2948ef6929c93b002db4628e227c2771919
 
 ENV           GOPATH=/build/golang/source
-ENV           PATH=$GOPATH/bin:/build/golang/go/bin:$PATH
+ENV           GOROOT=/build/golang/go
+ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 # CGO disabled by default for cross-compilation to work
 ENV           GCO_ENABLED=0
 
-RUN           mkdir -p "$GOPATH/src" "$GOPATH/bin"
+WORKDIR       /build/golang
+
+RUN           set -Eeu; \
+              arch="$(dpkg --print-architecture)"; \
+              case "${arch##*-}" in \
+                amd64) arch='linux-amd64'; checksum="$GOLANG_AMD64_SHA512" ;; \
+                arm64) arch='linux-arm64'; checksum="$GOLANG_ARM64_SHA512" ;; \
+            		armel) arch='linux-armv6l'; checksum="$GOLANG_ARMV6L_SHA512" ;; \
+            		armhf) arch='linux-armv6l'; checksum="$GOLANG_ARMV6L_SHA512" ;; \
+            		*) echo "unsupported architecture ${arch##*-}"; exit 1;; \
+              esac; \
+              # If using QEMU on a glibc system, cacerts are broken. Ignoring tls errors here for now - safeguarded by checksum verification
+              curl -k -fsSL -o go.tar.gz "https://dl.google.com/go/go${GOLANG_VERSION}.${arch}.tar.gz"; \
+              printf "%s *go.tar.gz" "$checksum" | sha512sum -c -; \
+              tar -xzf go.tar.gz; \
+              rm go.tar.gz; \
+              mkdir -p "$GOPATH/src" "$GOPATH/bin"
+
 WORKDIR       $GOPATH
 
 ###########################################################
 # Node
 ###########################################################
-ENV           NODE_VERSION 10.16.3
-ENV           YARN_VERSION 1.17.3
+ENV           NODE_VERSION 10.17.0
+ENV           YARN_VERSION 1.19.1
 
-RUN           set -eu; \
+RUN           set -Eeu; \
               arch="$(dpkg --print-architecture)"; \
               if [ "${arch##*-}" != "armel" ]; then \
                 case "${arch##*-}" in \
@@ -84,16 +84,16 @@ RUN           set -eu; \
                   gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
                   gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
                 done; \
-                curl -k -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$arch.tar.xz"; \
+                curl -k -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$arch.tar.gz"; \
                 curl -k -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc"; \
                 gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc; \
-                grep " node-v$NODE_VERSION-linux-$arch.tar.xz\$" SHASUMS256.txt | sha256sum -c -; \
-                tar -xJf "node-v$NODE_VERSION-linux-$arch.tar.xz" -C /usr/local --strip-components=1 --no-same-owner; \
-                rm "node-v$NODE_VERSION-linux-$arch.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt; \
+                grep " node-v$NODE_VERSION-linux-$arch.tar.gz\$" SHASUMS256.txt | sha256sum -c -; \
+                tar -xzf "node-v$NODE_VERSION-linux-$arch.tar.gz" -C /usr/local --strip-components=1 --no-same-owner; \
+                rm "node-v$NODE_VERSION-linux-$arch.tar.gz" SHASUMS256.txt.asc SHASUMS256.txt; \
                 ln -s /usr/local/bin/node /usr/local/bin/nodejs; \
               fi
 
-RUN           set -eu; \
+RUN           set -Eeu; \
               arch="$(dpkg --print-architecture)"; \
               if [ "${arch##*-}" != "armel" ]; then \
                 for key in \
@@ -117,7 +117,7 @@ RUN           set -eu; \
 # C++ and generic
 ###########################################################
 # For CGO
-RUN           apt-get install -y --no-install-recommends \
+RUN           apt-get install -qq --no-install-recommends \
                 g++=4:8.3.0-1 \
                 gcc=4:8.3.0-1 \
                 libc6-dev=2.28-10 \
@@ -126,93 +126,27 @@ RUN           apt-get install -y --no-install-recommends \
                 autoconf=2.69-11 \
                 automake=1:1.16.1-4 \
                 libtool=2.4.6-9 \
-		            pkg-config=0.29-6                                                                         > /dev/null
+		            pkg-config=0.29-6
 
 # Generic development stuff
-RUN           apt-get install -y --no-install-recommends \
-                git=1:2.20.1-2                                                                            > /dev/null
+RUN           apt-get install -qq --no-install-recommends \
+                jq=1.5+dfsg-2+b1 \
+                git=1:2.20.1-2
 
 ###########################################################
 # Python
 ###########################################################
-RUN           apt-get install -y --no-install-recommends \
+RUN           apt-get install -qq --no-install-recommends \
                 python=2.7.16-1 \
-                virtualenv=15.1.0+ds-2                                                                    > /dev/null
+                virtualenv=15.1.0+ds-2
 
 # This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
-ONBUILD RUN   set -eu; \
-              major=${GOLANG_VERSION%%.*}; \
-              rest=${GOLANG_VERSION#*.}; \
-              minor=${rest%%.*}; \
-              if [ "$rest" != "$minor" ]; then patch=${rest#*.}; fi; \
-              candidate_patch=${patch:-0}; \
-              next_patch=$((patch + 1)); \
-              while [ "$(curl -k -I -o /dev/null -v https://dl.google.com/go/go$major.$minor.$next_patch.linux-amd64.tar.gz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
-                candidate_patch=$next_patch; \
-                next_patch=$((next_patch + 1)); \
-              done; \
-              if [ "$candidate_patch" != "${patch:-0}" ]; then \
-                >&2 printf "WARNING: golang has a new patch version - the base image should DEFINITELY be updated to:\n"; \
-                >&2 printf "ENV           GOLANG_VERSION %s.%s.%s\n" "$major" "$minor" "$candidate_patch"; \
-                checksum=$(curl -k -fsSL "https://dl.google.com/go/go$major.$minor.$candidate_patch.linux-amd64.tar.gz" | sha256sum); \
-                >&2 printf "ENV           GOLANG_AMD64_SHA256 %s\n" "${checksum%*-}"; \
-                checksum=$(curl -k -fsSL "https://dl.google.com/go/go$major.$minor.$candidate_patch.linux-arm64.tar.gz" | sha256sum); \
-                >&2 printf "ENV           GOLANG_ARM64_SHA256 %s\n" "${checksum%*-}"; \
-                checksum=$(curl -k -fsSL "https://dl.google.com/go/go$major.$minor.$candidate_patch.linux-armv6l.tar.gz" | sha256sum); \
-                >&2 printf "ENV           GOLANG_ARMV6_SHA256 %s\n" "${checksum%*-}"; \
-                if [ "$FAIL_WHEN_OUTDATED" ]; then \
-                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
-                  exit 1; \
-                fi \
-              fi; \
-              candidate_minor=$minor; \
-              next_minor=$((minor + 1)); \
-              while [ "$(curl -k -I -o /dev/null -v https://dl.google.com/go/go$major.$next_minor.linux-amd64.tar.gz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
-                candidate_minor=$next_minor; \
-                next_minor=$((next_minor + 1)); \
-              done; \
-              if [ "$candidate_minor" != "$minor" ]; then \
-                if [ "$candidate_minor" != "$((minor + 1))" ]; then \
-                  >&2 printf "WARNING: the version of golang you are using is badly outdated. The base image NEED to be updated to %s.%s ASAP." "$major" "$candidate_minor"; \
-                  if [ "$FAIL_WHEN_OUTDATED" ]; then \
-                    >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
-                    exit 1; \
-                  fi \
-                else \
-                  >&2 printf "WARNING: there is a new golang version %s.%s - the base image should be updated to it soon." "$major" "$candidate_minor"; \
-                fi \
-              fi
+COPY          ./scripts /scripts
 
-ONBUILD RUN   set -eu; \
-              major=${NODE_VERSION%%.*}; \
-              rest=${NODE_VERSION#*.}; \
-              minor=${rest%%.*}; \
-              if [ "$rest" != "$minor" ]; then patch=${rest#*.}; fi; \
-              candidate_patch=${patch:-0}; \
-              next_patch=$((patch + 1)); \
-              while [ "$(curl -k -I -o /dev/null -v https://nodejs.org/dist/v$major.$minor.$next_patch/node-v$major.$minor.$next_patch-linux-arm64.tar.xz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
-                candidate_patch=$next_patch; \
-                next_patch=$((next_patch + 1)); \
-              done; \
-              if [ "$candidate_patch" != "${patch:-0}" ]; then \
-                >&2 printf "WARNING: node has a new patch version - the base image should DEFINITELY be updated to %s:\n" "$major.$minor.$candidate_patch"; \
-                if [ "$FAIL_WHEN_OUTDATED" ]; then \
-                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
-                  exit 1; \
-                fi \
-              fi; \
-              candidate_minor=$minor; \
-              next_minor=$((minor + 1)); \
-              while [ "$(curl -k -I -o /dev/null -v https://nodejs.org/dist/v$major.$next_minor.0/node-v$major.$next_minor.0-linux-arm64.tar.xz 2>&1 | grep -P "HTTP/[0-9] [0-9]{3}" | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do \
-                candidate_minor=$next_minor; \
-                next_minor=$((next_minor + 1)); \
-              done; \
-              if [ "$candidate_minor" != "$minor" ]; then \
-                >&2 printf "WARNING: the version of node you are using is outdated. The base image NEED to be updated to %s.%s.0 ASAP." "$major" "$candidate_minor"; \
-                if [ "$FAIL_WHEN_OUTDATED" ]; then \
-                  >&2 printf "If you still want to build with the old version, set build arg FAIL_WHEN_OUTDATED to \"\"" \
-                  exit 1; \
-                fi \
-              fi
+RUN           /scripts/version-check.sh
 
+ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   FAIL_WHEN_OUTDATED="true"
 
+ONBUILD RUN   /scripts/version-check.sh

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -o errexit -o errtrace -o functrace -o nounset -o pipefail
+
+export DEBIAN="dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4"
+export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
 
 export DOCKER_CONTENT_TRUST=1
 export DOCKER_CLI_EXPERIMENTAL=enabled
@@ -19,21 +23,22 @@ build::setup(){
 }
 
 build::runtime(){
-# --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.runtime --pull --target runtime \
-    -t docker.io/dubodubonduponey/base:runtime \
-    --platform "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6" --push "$@" .
+    --build-arg DEBIAN="$DEBIAN" \
+    --tag docker.io/dubodubonduponey/base:runtime \
+    --platform "$PLATFORMS" --push "$@" .
 }
 
 build::builder(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.builder --pull --target builder \
-    -t docker.io/dubodubonduponey/base:builder \
-    --platform "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6" --push "$@" .
+    --build-arg DEBIAN="$DEBIAN" \
+    --tag docker.io/dubodubonduponey/base:builder \
+    --platform "$PLATFORMS" --push "$@" .
 }
 
-docker::version_check || exit 1
-build::setup || exit 1
+docker::version_check
+build::setup
 
-build::builder "$@" || exit 1
+build::builder "$@"
 build::runtime "$@"

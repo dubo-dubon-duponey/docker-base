@@ -4,16 +4,18 @@
 # Right now:
 # - updated ca root
 #######################
-FROM          debian:buster-slim                                                                            AS runtime-builder
+ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+FROM          $DEBIAN                                                                                                   AS runtime-builder
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
 ARG           LANG="C.UTF-8"
 ARG           LC_ALL="C.UTF-8"
+ENV           TZ="America/Los_Angeles"
 
-RUN           apt-get update                                                                                > /dev/null
-RUN           apt-get install -y --no-install-recommends \
-                ca-certificates=20190110                                                                    > /dev/null
+RUN           apt-get update -qq
+RUN           apt-get install -qq --no-install-recommends \
+                ca-certificates=20190110
 RUN           update-ca-certificates
 
 #######################
@@ -26,19 +28,24 @@ RUN           update-ca-certificates
 # - anything useful from the builder-generic image
 # - automatic entrypoint definition and user setting
 #######################
-FROM          debian:buster-slim                                                                            AS runtime
+ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+FROM          $DEBIAN                                                                                                   AS runtime
 
 ENV           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
+ENV           TZ="America/Los_Angeles"
+
+ENV           PATH=/boot/bin:$PATH
+ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 
 # The usefulness/security angle of this should be assessed.
 COPY          --from=runtime-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=runtime-builder /usr/share/ca-certificates /usr/share/ca-certificates
 
 # Build args
-ONBUILD ARG   BUILD_UID=1000
+ONBUILD ARG   BUILD_UID=2000
 
 # Labels build args
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
@@ -73,12 +80,11 @@ ONBUILD COPY  runtime  /
 # The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
 # Write is granted, although that doesn't really matter in term of security
 
-# Create a restriced user account (no shell, no home, disabled)
-ONBUILD RUN   adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
+# Create a restricted user account (no shell, no home, disabled)
+ONBUILD RUN   set -Eeu; \
+              adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid $BUILD_UID \
                 dubo-dubon-duponey \
-              && chmod 550 /boot/entrypoint.sh \
-              && chown $BUILD_UID:root /boot/entrypoint.sh \
               && mkdir -p /boot \
               && mkdir -p /config \
               && mkdir -p /data \
@@ -87,14 +93,14 @@ ONBUILD RUN   adduser --system --no-create-home --home /nonexistent --gecos "in 
               && chown -R $BUILD_UID:root /config \
               && chown -R $BUILD_UID:root /data \
               && chown -R $BUILD_UID:root /certs \
-              && find /boot -type d -exec chmod -R 770 {} \; \
-              && find /boot -type f -exec chmod -R 770 {} \; \
-              && find /config -type d -exec chmod -R 770 {} \; \
-              && find /config -type f -exec chmod -R 660 {} \; \
-              && find /data   -type d -exec chmod -R 770 {} \; \
-              && find /data   -type f -exec chmod -R 660 {} \; \
-              && find /certs  -type d -exec chmod -R 770 {} \; \
-              && find /certs  -type f -exec chmod -R 660 {} \;
+              && find /boot   -type d -exec chmod -R 555 {} \; \
+              && find /config -type d -exec chmod -R 555 {} \; \
+              && find /data   -type d -exec chmod -R 777 {} \; \
+              && find /certs  -type d -exec chmod -R 777 {} \; \
+              && find /boot   -type f -exec chmod -R 555 {} \; \
+              && find /config -type f -exec chmod -R 444 {} \; \
+              && find /data   -type f -exec chmod -R 666 {} \; \
+              && find /certs  -type f -exec chmod -R 666 {} \;
 
 # Downgrade to system user
 ONBUILD USER  dubo-dubon-duponey

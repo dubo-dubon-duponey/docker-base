@@ -1,4 +1,5 @@
 ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+# hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS builder
 
 ARG           TARGETPLATFORM
@@ -9,6 +10,7 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
+# hadolint ignore=DL3009
 RUN           apt-get update -qq \
               && apt-get install -qq --no-install-recommends \
                 curl=7.64.0-4 \
@@ -34,7 +36,8 @@ ENV           GCO_ENABLED=0
 
 WORKDIR       /build/golang
 
-RUN           set -Eeu; \
+# hadolint ignore=DL4006
+RUN           set -eu; \
               arch="$(dpkg --print-architecture)"; \
               case "${arch##*-}" in \
                 amd64) arch='linux-amd64'; checksum="$GOLANG_AMD64_SHA512" ;; \
@@ -58,7 +61,8 @@ WORKDIR       $GOPATH
 ENV           NODE_VERSION 10.17.0
 ENV           YARN_VERSION 1.19.1
 
-RUN           set -Eeu; \
+# hadolint ignore=DL4006
+RUN           set -eu; \
               arch="$(dpkg --print-architecture)"; \
               if [ "${arch##*-}" != "armel" ]; then \
                 case "${arch##*-}" in \
@@ -93,16 +97,12 @@ RUN           set -Eeu; \
                 ln -s /usr/local/bin/node /usr/local/bin/nodejs; \
               fi
 
-RUN           set -Eeu; \
+RUN           set -eu; \
               arch="$(dpkg --print-architecture)"; \
               if [ "${arch##*-}" != "armel" ]; then \
-                for key in \
-                  6A010C5166006599AA17F08146C2130DFD2497F5 \
-                ; do \
-                  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
-                  gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-                  gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key"; \
-                done; \
+                gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5" || \
+                gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5" || \
+                gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5"; \
                 curl -k -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz"; \
                 curl -k -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc"; \
                 gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz; \

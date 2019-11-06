@@ -5,6 +5,7 @@
 # - updated ca root
 #######################
 ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+# hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS runtime-builder
 
 ARG           DEBIAN_FRONTEND="noninteractive"
@@ -29,6 +30,7 @@ RUN           update-ca-certificates
 # - automatic entrypoint definition and user setting
 #######################
 ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+# hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS runtime
 
 ENV           DEBIAN_FRONTEND="noninteractive"
@@ -81,7 +83,7 @@ ONBUILD COPY  runtime  /
 # Write is granted, although that doesn't really matter in term of security
 
 # Create a restricted user account (no shell, no home, disabled)
-ONBUILD RUN   set -Eeu; \
+ONBUILD RUN   set -eu; \
               adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid $BUILD_UID \
                 dubo-dubon-duponey \

@@ -91,18 +91,22 @@ ONBUILD RUN   set -eu; \
               && mkdir -p /config \
               && mkdir -p /data \
               && mkdir -p /certs \
+              && mkdir -p /tmp \
               && chown -R $BUILD_UID:root /boot \
               && chown -R $BUILD_UID:root /config \
               && chown -R $BUILD_UID:root /data \
               && chown -R $BUILD_UID:root /certs \
+              && chown -R $BUILD_UID:root /tmp \
               && find /boot   -type d -exec chmod -R 555 {} \; \
               && find /config -type d -exec chmod -R 555 {} \; \
               && find /data   -type d -exec chmod -R 777 {} \; \
               && find /certs  -type d -exec chmod -R 777 {} \; \
+              && find /tmp    -type d -exec chmod -R 777 {} \; \
               && find /boot   -type f -exec chmod -R 555 {} \; \
               && find /config -type f -exec chmod -R 444 {} \; \
               && find /data   -type f -exec chmod -R 666 {} \; \
-              && find /certs  -type f -exec chmod -R 666 {} \;
+              && find /certs  -type f -exec chmod -R 666 {} \; \
+              && find /tmp    -type f -exec chmod -R 666 {} \;
 
 # Downgrade to system user
 ONBUILD USER  dubo-dubon-duponey

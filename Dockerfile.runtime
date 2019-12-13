@@ -4,7 +4,7 @@
 # Right now:
 # - updated ca root
 #######################
-ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+ARG           DEBIAN=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS runtime-builder
 
@@ -29,7 +29,7 @@ RUN           update-ca-certificates
 # - anything useful from the builder-generic image
 # - automatic entrypoint definition and user setting
 #######################
-ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+ARG           DEBIAN=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS runtime
 

@@ -1,4 +1,4 @@
-ARG           DEBIAN=dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4
+ARG           DEBIAN=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
 FROM          $DEBIAN                                                                                                   AS builder
 
@@ -23,11 +23,27 @@ RUN           update-ca-certificates
 ###########################################################
 # Golang
 ###########################################################
-ENV           GOLANG_VERSION 1.13.4
-ENV           GOLANG_AMD64_SHA512 bacaf9af8482fc3ca579fab1ef78a1646a846a736b7eb776328bbed430d2ef7d33abb2d4a4b0119378bb10efc33b813959654c04c0ef56e522b5bc8a817eada3
-ENV           GOLANG_ARM64_SHA512 786cdf2e9f1bed2e98679fdb12f6bb0a2add5c20bbd55cd95801b81d220f9091fbcc588e4ad939ccdf49c454d629e5cb0d686e3517a3d1267840e1959572d97c
-ENV           GOLANG_ARMV6L_SHA512 b9bd1e0ee9cf6fd0e5b03cf5a099352df62538be37e14798935c86a3d42e4c1e4a3a4118f32e29fd4ae212956533f2948ef6929c93b002db4628e227c2771919
+ENV           GOLANG_VERSION 1.13.5
+ENV           GOLANG_AMD64_SHA512 738019bbf217507f16e8bade6eda3a6114fac9f0802d42b644f9c9699d72796b5a28f5bcbdcefa84fcf4455c054961df358dc6fb5ff66c2867b7ab8f519cf3ae
+ENV           GOLANG_ARM64_SHA512 9da20417f7e999c3186c2e588af587381bc7f686f06ca9f1ac93b674e29ef959b0223fdd27d3aa4e7857e491063845982c38b2109011bbf469576c8b32eae5b9
+ENV           GOLANG_ARMV6L_SHA512 12d069ab66bdc8d6171dc423d964c704bce1be69b1652ddb78d5f7ff2e3b7d548ff56419b905edd041cbe00f5dd98f45346186b614988d02e896fed922b2de5b
 
+###########################################################
+# Node
+###########################################################
+ENV           NODE_VERSION 10.17.0
+ENV           YARN_VERSION 1.21.1
+
+ARG           FAIL_WHEN_OUTDATED="true"
+
+# This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
+COPY          ./scripts /scripts
+
+RUN           /scripts/version-check.sh
+
+###########################################################
+# Golang build
+###########################################################
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -56,11 +72,8 @@ RUN           set -eu; \
 WORKDIR       $GOPATH
 
 ###########################################################
-# Node
+# Node build
 ###########################################################
-ENV           NODE_VERSION 10.17.0
-ENV           YARN_VERSION 1.19.1
-
 # hadolint ignore=DL4006
 RUN           set -eu; \
               arch="$(dpkg --print-architecture)"; \
@@ -139,11 +152,6 @@ RUN           apt-get install -qq --no-install-recommends \
 RUN           apt-get install -qq --no-install-recommends \
                 python=2.7.16-1 \
                 virtualenv=15.1.0+ds-2
-
-# This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
-COPY          ./scripts /scripts
-
-RUN           /scripts/version-check.sh
 
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM

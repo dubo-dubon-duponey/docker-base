@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-export DEBIAN="dubodubonduponey/debian@sha256:bdd32c4cdda4feab5732222de8f4feb50d02fbbff1ecf47072a4af5ef828b2a4"
+export DEBIAN="dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e"
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
 
 export DOCKER_CONTENT_TRUST=1

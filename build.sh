@@ -26,7 +26,7 @@ build::setup(){
 build::runtime(){
   docker buildx build -f Dockerfile.runtime --pull --target runtime \
     --build-arg BASE="$BASE" \
-    --tag docker.io/dubodubonduponey/base:runtime-${DEBIAN_DATE} \
+    --tag docker.io/dubodubonduponey/base:runtime-"${DEBIAN_DATE}" \
     --platform "$PLATFORMS" --push "$@" .
 }
 
@@ -34,7 +34,7 @@ build::builder(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.builder --pull --target builder \
     --build-arg BASE="$BASE" \
-    --tag docker.io/dubodubonduponey/base:builder-${DEBIAN_DATE} \
+    --tag docker.io/dubodubonduponey/base:builder-"${DEBIAN_DATE}" \
     --platform "$PLATFORMS" --push "$@" .
 }
 

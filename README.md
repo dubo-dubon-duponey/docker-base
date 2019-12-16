@@ -2,16 +2,16 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6:
+Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2019-12-01`):
 
- * `docker.io/dubodubonduponey/base:runtime`
+ * `dubodubonduponey/base:runtime-$DEBIAN_DATE`
     * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`)
     * labels
     * ca-certificates copied over
     * ONBUILD instructions to copy over runtime folders
     * user creation
     * entrypoint definition
- * `docker.io/dubodubonduponey/base:builder`
+ * `dubodubonduponey/base:builder-$DEBIAN_DATE`
     * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`)
     * golang, python, and essential dev & build tools
     * nodejs + yarnpkg (except on arm/v6)

@@ -33,7 +33,7 @@ BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
 # If you want to control which platforms are being built
 PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
 
-# Control images naming
+# Control resulting images naming
 REGISTRY="registry-1.docker.io"
 VENDOR="dubodubonduponey"
 IMAGE_NAME="base"
@@ -42,6 +42,14 @@ IMAGE_NAME="base"
 IMAGE_NAME_RUNTIME="${REGISTRY}/${VENDOR}/${IMAGE_NAME}:runtime-${DEBIAN_DATE}"
 IMAGE_NAME_BUILDER="${REGISTRY}/${VENDOR}/${IMAGE_NAME}:builder-${DEBIAN_DATE}"
 ```
+
+## Notes
+
+The builder image will FAIL building if it detects a new patch release for golang, node or yarn.
+
+In that case, it will provide updated versions (and sha) to update in the dockerfile.
+
+Alternatively, you can pass `FAIL_WHEN_OUTDATED=` as a build arg to build with outdated versions.
 
 ## Caveats
 

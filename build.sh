@@ -2,8 +2,15 @@
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 export DEBIAN_DATE=${DEBIAN_DATE:-2019-12-01}
-export BASE="dubodubonduponey/debian:$DEBIAN_DATE"
+export BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+
+export REGISTRY="${REGISTRY:-registry-1.docker.io}"
+export VENDOR="${VENDOR:-dubodubonduponey}"
+export IMAGE_NAME="${IMAGE_NAME:-base}"
+
+export IMAGE_NAME_RUNTIME="${IMAGE_NAME_RUNTIME:-${REGISTRY}/${VENDOR}/${IMAGE_NAME}:runtime-${DEBIAN_DATE}}"
+export IMAGE_NAME_BUILDER="${IMAGE_NAME_RUNTIME:-${REGISTRY}/${VENDOR}/${IMAGE_NAME}:builder-${DEBIAN_DATE}}"
 
 export DOCKER_CONTENT_TRUST=1
 export DOCKER_CLI_EXPERIMENTAL=enabled
@@ -26,7 +33,7 @@ build::setup(){
 build::runtime(){
   docker buildx build -f Dockerfile.runtime --pull --target runtime \
     --build-arg BASE="$BASE" \
-    --tag docker.io/dubodubonduponey/base:runtime-"${DEBIAN_DATE}" \
+    --tag "$IMAGE_NAME_BUILDER" \
     --platform "$PLATFORMS" --push "$@" .
 }
 
@@ -34,7 +41,7 @@ build::builder(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.builder --pull --target builder \
     --build-arg BASE="$BASE" \
-    --tag docker.io/dubodubonduponey/base:builder-"${DEBIAN_DATE}" \
+    --tag "$IMAGE_NAME_RUNTIME" \
     --platform "$PLATFORMS" --push "$@" .
 }
 

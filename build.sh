@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-export DEBIAN="dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e"
+export DEBIAN_DATE=${DEBIAN_DATE:-2019-12-01}
+export BASE="dubodubonduponey/debian:$DEBIAN_DATE"
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
 
 export DOCKER_CONTENT_TRUST=1
@@ -24,16 +25,16 @@ build::setup(){
 
 build::runtime(){
   docker buildx build -f Dockerfile.runtime --pull --target runtime \
-    --build-arg DEBIAN="$DEBIAN" \
-    --tag docker.io/dubodubonduponey/base:runtime \
+    --build-arg BASE="$BASE" \
+    --tag docker.io/dubodubonduponey/base:runtime-${DEBIAN_DATE} \
     --platform "$PLATFORMS" --push "$@" .
 }
 
 build::builder(){
 # --cache-to type=local,dest="$HOME"/tmp/dubo-cache
   docker buildx build -f Dockerfile.builder --pull --target builder \
-    --build-arg DEBIAN="$DEBIAN" \
-    --tag docker.io/dubodubonduponey/base:builder \
+    --build-arg BASE="$BASE" \
+    --tag docker.io/dubodubonduponey/base:builder-${DEBIAN_DATE} \
     --platform "$PLATFORMS" --push "$@" .
 }
 

@@ -1,6 +1,6 @@
-ARG           DEBIAN=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
+ARG           BASE=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
-FROM          $DEBIAN                                                                                                   AS builder
+FROM          $BASE                                                                                                     AS builder
 
 ARG           TARGETPLATFORM
 

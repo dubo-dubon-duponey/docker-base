@@ -2,7 +2,7 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2019-12-01`):
+Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-01-01`):
 
  * `dubodubonduponey/base:runtime-$DEBIAN_DATE`
     * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`)
@@ -27,7 +27,7 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form
 
 ```bash
 # Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
-DEBIAN_DATE=2019-12-01
+DEBIAN_DATE=2020-01-01
 # If you want to use an entirely different Debian base
 BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
 # If you want to control which platforms are being built

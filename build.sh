@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-export DEBIAN_DATE=${DEBIAN_DATE:-2019-12-01}
+export DEBIAN_DATE=${DEBIAN_DATE:-2020-01-01}
 export BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
 

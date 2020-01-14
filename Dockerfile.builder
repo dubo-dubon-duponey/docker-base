@@ -23,18 +23,18 @@ RUN           update-ca-certificates
 ###########################################################
 # Golang
 ###########################################################
-ENV           GOLANG_VERSION 1.13.5
-ENV           GOLANG_AMD64_SHA512 738019bbf217507f16e8bade6eda3a6114fac9f0802d42b644f9c9699d72796b5a28f5bcbdcefa84fcf4455c054961df358dc6fb5ff66c2867b7ab8f519cf3ae
-ENV           GOLANG_ARM64_SHA512 9da20417f7e999c3186c2e588af587381bc7f686f06ca9f1ac93b674e29ef959b0223fdd27d3aa4e7857e491063845982c38b2109011bbf469576c8b32eae5b9
-ENV           GOLANG_ARMV6L_SHA512 12d069ab66bdc8d6171dc423d964c704bce1be69b1652ddb78d5f7ff2e3b7d548ff56419b905edd041cbe00f5dd98f45346186b614988d02e896fed922b2de5b
+ENV           GOLANG_VERSION 1.13.6
+ENV           GOLANG_AMD64_SHA512 92ec5741c9330c86bc598c1db97bb3eb9a784a13988befae5f4bbb647a14db27389c48df4dbfa277f54aa598a0c20f7165f3bf996d108f445f993e2579e0b01d
+ENV           GOLANG_ARM64_SHA512 99ff498d7de3b8b339e28eb66017e2237f58b914b9bcb552cab5ee1fda1edad18f54fb38084b026167471efafe0185b2a5e75bfc54563541cea7b074edccf006
+ENV           GOLANG_ARMV6L_SHA512 bba388dc24cb7c13e5e00699488e25dc5d81fe08a84720e9a5e8f6da6845cd3030717a057ac483785787d5c192d7baab76c09b5804323e3d8eaa512dbd716639
 
 ###########################################################
 # Node
 ###########################################################
-ENV           NODE_VERSION 10.17.0
+ENV           NODE_VERSION 10.18.1
 ENV           YARN_VERSION 1.21.1
 
-ARG           FAIL_WHEN_OUTDATED="true"
+ARG           FAIL_WHEN_OUTDATED=true
 
 # This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
 COPY          ./scripts /scripts
@@ -155,6 +155,6 @@ RUN           apt-get install -qq --no-install-recommends \
 
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   FAIL_WHEN_OUTDATED="true"
+ONBUILD ARG   FAIL_WHEN_OUTDATED=true
 
 ONBUILD RUN   /scripts/version-check.sh

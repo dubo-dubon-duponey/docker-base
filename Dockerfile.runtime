@@ -1,12 +1,14 @@
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:4458242d4047319887f768f056630abdced4b81fccd1c2b5d56971d8f1df59ed
 #######################
-# Runtime "builder"
-# This image is meant to provide basic files for all runtime images, copied over directly into the base runtime image.
+# "Builder"
+# This image is meant to provide basic files copied over directly into the base target image.
 # Right now:
 # - updated ca root
 #######################
-ARG           BASE=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
-FROM          $BASE                                                                                                     AS runtime-builder
+FROM          --platform=$BUILDPLATFORM $RUNTIME_BASE                                                                   AS runtime-builder
+
+ARG           TARGETPLATFORM
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
@@ -30,7 +32,7 @@ RUN           update-ca-certificates
 # - automatic entrypoint definition and user setting
 #######################
 # hadolint ignore=DL3006
-FROM          $BASE                                                                                                     AS runtime
+FROM          $RUNTIME_BASE                                                                                             AS runtime
 
 ENV           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"

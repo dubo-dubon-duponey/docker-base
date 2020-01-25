@@ -1,52 +1,56 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-export DEBIAN_DATE=${DEBIAN_DATE:-2020-01-01}
-export BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
-export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 
-export REGISTRY="${REGISTRY:-registry-1.docker.io}"
-export VENDOR="${VENDOR:-dubodubonduponey}"
+# Which Debian version to use
+export DEBIAN_DATE=${DEBIAN_DATE:-2020-01-15}
+# Image name to push
 export IMAGE_NAME="${IMAGE_NAME:-base}"
 
-export IMAGE_NAME_RUNTIME="${IMAGE_NAME_RUNTIME:-${REGISTRY}/${VENDOR}/${IMAGE_NAME}:runtime-${DEBIAN_DATE}}"
-export IMAGE_NAME_BUILDER="${IMAGE_NAME_BUILDER:-${REGISTRY}/${VENDOR}/${IMAGE_NAME}:builder-${DEBIAN_DATE}}"
+# Override composed base image
+export BUILDER_BASE="${BUILDER_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
+export RUNTIME_BASE="${RUNTIME_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
 
-export DOCKER_CONTENT_TRUST=1
-export DOCKER_CLI_EXPERIMENTAL=enabled
+refresh() {
+  local cwd="$1"
+  local base="$2"
 
-docker::version_check(){
-  dv="$(docker version | grep "^ Version")"
-  dv="${dv#*:}"
-  dv="${dv##* }"
-  if [ "${dv%%.*}" -lt "19" ]; then
-    >&2 printf "Docker is too old and doesn't support buildx. Failing!\n"
-    return 1
-  fi
+  docker buildx build -f "$cwd"/Dockerfile.downloader \
+    --build-arg "BUILDER_BASE=$base" \
+    --tag local/dubodubonduponey/downloader \
+    --output type=docker \
+    "$cwd"
+
+  docker rm -f downloader 2>/dev/null || true
+  export DOCKER_CONTENT_TRUST=0
+  docker run --rm --name downloader --volume "$cwd/cache:/cache" local/dubodubonduponey/downloader
+  export DOCKER_CONTENT_TRUST=1
 }
 
-build::setup(){
-  docker buildx create --node "dubo-dubon-duponey-building-0" --name "dubo-dubon-duponey-building"
-  docker buildx use "dubo-dubon-duponey-building"
-}
+refresh "$root" "$BUILDER_BASE"
 
-build::runtime(){
-  docker buildx build -f Dockerfile.runtime --pull --target runtime \
-    --build-arg BASE="$BASE" \
-    --tag "$IMAGE_NAME_RUNTIME" \
-    --platform "$PLATFORMS" --push "$@" .
-}
+## Runtime
 
-build::builder(){
-# --cache-to type=local,dest="$HOME"/tmp/dubo-cache
-  docker buildx build -f Dockerfile.builder --pull --target builder \
-    --build-arg BASE="$BASE" \
-    --tag "$IMAGE_NAME_BUILDER" \
-    --platform "$PLATFORMS" --push "$@" .
-}
+# Title and description
+export TITLE="Dubo Runtime"
+export DESCRIPTION="Base runtime image for all DBDBDP images"
+# Image tag to push
+export IMAGE_TAG="runtime-${DEBIAN_DATE}"
+export DOCKERFILE="$root"/Dockerfile.runtime
 
-docker::version_check
-build::setup
+# shellcheck source=/dev/null
+. "$root/helpers.sh"
 
-build::builder "$@"
-build::runtime "$@"
+## Builder
+
+# Title and description
+export TITLE="Dubo Builder"
+export DESCRIPTION="Base builder image for all DBDBDP images"
+# Image tag to push
+export IMAGE_TAG="builder-${DEBIAN_DATE}"
+export DOCKERFILE="$root"/Dockerfile.builder
+export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
+
+# shellcheck source=/dev/null
+. "$root/helpers.sh"

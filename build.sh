@@ -28,7 +28,7 @@ refresh() {
   export DOCKER_CONTENT_TRUST=1
 }
 
-refresh "$root" "$BUILDER_BASE"
+[ "$NO_REFRESH" ] || refresh "$root" "$BUILDER_BASE"
 
 ## Runtime
 

@@ -28,7 +28,7 @@ refresh() {
   export DOCKER_CONTENT_TRUST=1
 }
 
-[ "$NO_REFRESH" ] || refresh "$root" "$BUILDER_BASE"
+[ "${NO_REFRESH:-}" ] || refresh "$root" "$BUILDER_BASE"
 
 ## Runtime
 
@@ -37,7 +37,7 @@ export TITLE="Dubo Runtime"
 export DESCRIPTION="Base runtime image for all DBDBDP images"
 # Image tag to push
 export IMAGE_TAG="runtime-${DEBIAN_DATE}"
-export DOCKERFILE="$root"/Dockerfile.runtime
+export DOCKERFILE=Dockerfile.runtime
 
 # shellcheck source=/dev/null
 . "$root/helpers.sh"
@@ -49,7 +49,7 @@ export TITLE="Dubo Builder"
 export DESCRIPTION="Base builder image for all DBDBDP images"
 # Image tag to push
 export IMAGE_TAG="builder-${DEBIAN_DATE}"
-export DOCKERFILE="$root"/Dockerfile.builder
+export DOCKERFILE=Dockerfile.builder
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 
 # shellcheck source=/dev/null

@@ -169,7 +169,7 @@ check::node
 check::golang
 check::yarn
 
-for product in golang node; do # yarn
+for product in golang node yarn; do
   init::"$product"
 
   version="$(env::version::read "$product")"

@@ -12,7 +12,7 @@ TITLE="${TITLE:-}"
 DESCRIPTION="${DESCRIPTION:-}"
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
 DEBIAN_DATE=${DEBIAN_DATE:-2020-01-01}
-DOCKERFILE="${DOCKERFILE:-"$root/Dockerfile"}"
+DOCKERFILE="$root/${DOCKERFILE:-Dockerfile}"
 BUILDER_BASE="${BUILDER_BASE:-dubodubonduponey/base:builder-${DEBIAN_DATE}}"
 RUNTIME_BASE="${RUNTIME_BASE:-dubodubonduponey/base:runtime-${DEBIAN_DATE}}"
 
@@ -25,14 +25,14 @@ NO_CACHE="${NO_CACHE:-}"
 [ ! "$NO_CACHE" ] || CACHE=--no-cache
 
 # Automated metadata
-LICENSE="$(head -n 1 LICENSE)"
+LICENSE="$(head -n 1 "$root/LICENSE")"
 # https://tools.ietf.org/html/rfc3339
 # XXX it doesn't seem like BSD date can format the timezone appropriately according to RFC3339 - eg: %:z doesn't work and %z misses the colon, so the gymnastic here
 DATE="$(date +%Y-%m-%dT%T%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
-VERSION="$(git describe --match 'v[0-9]*' --dirty='.m' --always)"
-REVISION="$(git rev-parse HEAD)$(if ! git diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
+VERSION="$(git -C "$root" describe --match 'v[0-9]*' --dirty='.m' --always)"
+REVISION="$(git -C "$root" rev-parse HEAD)$(if ! git diff --no-ext-diff --quiet --exit-code; then printf ".m\\n"; fi)"
 # XXX this is dirty, resolve ssh aliasing to github by default
-URL="$(git remote show -n origin | grep "Fetch URL")"
+URL="$(git -C "$root" remote show -n origin | grep "Fetch URL")"
 URL="${URL#*Fetch URL: }"
 URL="$(printf "%s" "$URL"| sed -E 's,.git$,,' | sed -E 's,^[a-z-]+:([^/]),https://github.com/\1,')"
 DOCUMENTATION="$URL/blob/1/README.md"

@@ -3,7 +3,7 @@ ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:4458242d4047319887f768
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
 # hadolint ignore=DL3006
-FROM          $BUILDER_BASE                                                                                             AS builder-builder
+FROM          $BUILDER_BASE                                                                                             AS downloader
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"

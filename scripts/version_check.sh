@@ -24,7 +24,7 @@ version::latest::checksum() {
   printf >&2 "ENV           %s %s.%s.%s\n" "$(env::version::name "$lang")" "$major" "$minor" "$patch"
 
   for platform in "${platforms[@]}"; do
-    cache::download "$platform" "$lang-$major.$minor.$patch.tar.gz" "$(url::"$lang" "$major" "$minor" "$patch" "$platform")"
+    cache::download "$platform" "$lang-$major.$minor.$patch.tar.gz" "$(url::"$lang" "$platform" "$major" "$minor" "$patch")"
     printf >&2 "ENV           %s %s\n" \
       "$(env::checksum::name "$lang" "$platform")" \
       "$(cache::checksum::compute "$platform" "$lang-$major.$minor.$patch.tar.gz")"

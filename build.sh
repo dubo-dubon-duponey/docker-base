@@ -4,7 +4,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 
 # Which Debian version to use
-export DEBIAN_DATE=${DEBIAN_DATE:-2020-01-15}
+export DEBIAN_DATE=${DEBIAN_DATE:-2020-02-15}
 # Image name to push
 export IMAGE_NAME="${IMAGE_NAME:-base}"
 
@@ -19,12 +19,14 @@ refresh() {
   docker buildx build -f "$cwd"/Dockerfile.downloader \
     --build-arg "BUILDER_BASE=$base" \
     --tag local/dubodubonduponey/downloader \
+    --build-arg="http_proxy=$PROXY" \
+    --build-arg="https_proxy=$PROXY" \
     --output type=docker \
     "$cwd"
 
   docker rm -f downloader 2>/dev/null || true
   export DOCKER_CONTENT_TRUST=0
-  docker run --rm --name downloader --volume "$cwd/cache:/cache" local/dubodubonduponey/downloader
+  docker run --rm --name downloader --env="http_proxy=$PROXY" --env="https_proxy=$PROXY" --volume "$cwd/cache:/cache" local/dubodubonduponey/downloader
   export DOCKER_CONTENT_TRUST=1
 }
 

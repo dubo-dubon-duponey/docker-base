@@ -14,7 +14,7 @@ cache::download(){
 
   mkdir -p "$CACHE_ROOT/$arch"
   if [ ! -f "$CACHE_ROOT/$arch/$name" ]; then
-    curl -fsSL --compressed -o "$CACHE_ROOT/$arch/$name" "$url"
+    curl -fsSL --compressed -o "$CACHE_ROOT/$arch/$name" "$url" >/dev/null 2>&1
   fi
 }
 

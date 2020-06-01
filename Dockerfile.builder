@@ -72,7 +72,7 @@ COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-ce
 
 ENV           NODE_VERSION 10.20.1
 ENV           YARN_VERSION 1.22.2
-ENV           GOLANG_VERSION 1.13.11
+ENV           GOLANG_VERSION 1.13.12
 
 # Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang

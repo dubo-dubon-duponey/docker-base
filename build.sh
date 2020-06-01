@@ -12,6 +12,8 @@ export IMAGE_NAME="${IMAGE_NAME:-base}"
 export BUILDER_BASE="${BUILDER_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
 export RUNTIME_BASE="${RUNTIME_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
 
+PROXY="${PROXY:-}"
+
 refresh() {
   local cwd="$1"
   local base="$2"

@@ -14,7 +14,7 @@ ENV           TZ="America/Los_Angeles"
 # hadolint ignore=DL3009
 RUN           apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4 \
+                curl=7.64.0-4+deb10u1 \
                 gnupg=2.2.12-1+deb10u1 \
                 dirmngr=2.2.12-1+deb10u1 \
                 ca-certificates=20190110 && \
@@ -26,13 +26,13 @@ RUN           apt-get update -qq && \
 
 RUN           update-ca-certificates
 
-ENV           NODE_VERSION 10.19.0
-ENV           YARN_VERSION 1.22.0
-ENV           GOLANG_VERSION 1.13.8
-ENV           GOLANG_LINUX_AMD64_SHA512 67dcab5d6170a15f844261ee7088eb6255da697d90501d9ccb50aee77a067f7bd7f71b406be7e5e4e8af80b4fedf49c62119c49844f151c013b49ea743767cd8
-ENV           GOLANG_LINUX_ARM64_SHA512 27a1b1ec07db08e4bbc4604356856db5f81ea2c65a11678a696a5c0703fcd3fdf95b407c4e4f087147a302727146f776c0e9e52f3c9c080c83a1e6021429846c
-ENV           GOLANG_LINUX_ARM_V7_SHA512 c2a21a6a2af29337eb149263af42e56dc0707fe841bffc70cd51a33f3d41132de22344f69a12f8a8681740cb25c79d1d4953c998bd15e789b4cb9b9b628fdf1b
-ENV           GOLANG_LINUX_ARM_V6_SHA512 c2a21a6a2af29337eb149263af42e56dc0707fe841bffc70cd51a33f3d41132de22344f69a12f8a8681740cb25c79d1d4953c998bd15e789b4cb9b9b628fdf1b
+ENV           NODE_VERSION 10.20.1
+ENV           YARN_VERSION 1.22.2
+ENV           GOLANG_VERSION 1.13.11
+ENV           GOLANG_LINUX_AMD64_SHA512 29aee4dd0aa7b611a2c7cd15b8b7c43d6b3733c0aec5935f031cc0c3ce1937e511ae7445dd59e6b4ddd7da706dbcf3c7e34a519b7c5b6705f909fcfe314302e3
+ENV           GOLANG_LINUX_ARM64_SHA512 f510a625fe639fe095e80b5e7fd9d69a20e8f1757fd11fe498feb3fbf94baff532c5a7e0d4f5d7a83371500ae778ff9cf252e97bd29c53c1009236fed0e49063
+ENV           GOLANG_LINUX_ARM_V7_SHA512 78fc63a0b21f5fafa28884cfbf06e56ba37e8c26377e18203110de1735cb89233983d361ef7e72ed9bd967463d94382409cd6e9eebba23d7c75373c31e968cd3
+ENV           GOLANG_LINUX_ARM_V6_SHA512 78fc63a0b21f5fafa28884cfbf06e56ba37e8c26377e18203110de1735cb89233983d361ef7e72ed9bd967463d94382409cd6e9eebba23d7c75373c31e968cd3
 
 ENV           FAIL_WHEN_OUTDATED true
 

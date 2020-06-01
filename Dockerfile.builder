@@ -59,7 +59,7 @@ RUN           apt-get update -qq && \
                 python=2.7.16-1 \
                 virtualenv=15.1.0+ds-2 \
                 jq=1.5+dfsg-2+b1 \
-                git=1:2.20.1-2+deb10u1 && \
+                git=1:2.20.1-2+deb10u3 && \
               apt-get -qq autoremove      && \
               apt-get -qq clean           && \
               rm -rf /var/lib/apt/lists/* && \
@@ -70,9 +70,9 @@ RUN           apt-get update -qq && \
 COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
 
-ENV           NODE_VERSION 10.19.0
-ENV           YARN_VERSION 1.22.0
-ENV           GOLANG_VERSION 1.13.8
+ENV           NODE_VERSION 10.20.1
+ENV           YARN_VERSION 1.22.2
+ENV           GOLANG_VERSION 1.13.11
 
 # Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang

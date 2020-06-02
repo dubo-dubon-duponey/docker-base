@@ -84,6 +84,7 @@ ONBUILD COPY  runtime  /
 # Write is granted, although that doesn't really matter in term of security
 
 # Create a restricted user account (no shell, no home, disabled)
+# XXX it seems this is busting docker build cache capabilities... builds are not cached anymore after that... which is annoying when there is large dependencies (ffmpeg)
 ONBUILD RUN   set -eu; \
               adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid $BUILD_UID \

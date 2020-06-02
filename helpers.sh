@@ -4,7 +4,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 
 # Settings defaults
-REGISTRY="${REGISTRY:-registry-1.docker.io}"
+REGISTRY="${REGISTRY:-index.docker.io}"
 VENDOR="${VENDOR:-dubodubonduponey}"
 IMAGE_NAME="${IMAGE_NAME:-untitled}"
 IMAGE_TAG="${IMAGE_TAG:-v1}"

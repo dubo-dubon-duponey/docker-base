@@ -17,7 +17,8 @@ BUILDER_BASE="${BUILDER_BASE:-dubodubonduponey/base:builder-${DEBIAN_DATE}}"
 RUNTIME_BASE="${RUNTIME_BASE:-dubodubonduponey/base:runtime-${DEBIAN_DATE}}"
 
 # Behavioral
-PROXY="${PROXY:-}"
+APTPROXY="${APTPROXY:-}"
+GOPROXY="${GOPROXY:-}"
 PUSH=--push
 CACHE=
 NO_PUSH="${NO_PUSH:-}"
@@ -57,6 +58,7 @@ fi
 docker buildx create --node "${VENDOR}0" --name "$VENDOR" > /dev/null
 docker buildx use "$VENDOR"
 
+# shellcheck disable=SC2086
 docker buildx build --pull --platform "$PLATFORMS" --build-arg="FAIL_WHEN_OUTDATED=${FAIL_WHEN_OUTDATED:-}" \
   --build-arg="BUILDER_BASE=$BUILDER_BASE" \
   --build-arg="RUNTIME_BASE=$RUNTIME_BASE" \
@@ -71,10 +73,10 @@ docker buildx build --pull --platform "$PLATFORMS" --build-arg="FAIL_WHEN_OUTDAT
   --build-arg="BUILD_REF_NAME=$REGISTRY/$VENDOR/$IMAGE_NAME:$IMAGE_TAG" \
   --build-arg="BUILD_TITLE=$TITLE" \
   --build-arg="BUILD_DESCRIPTION=$DESCRIPTION" \
-  --build-arg="http_proxy=$PROXY" \
-  --build-arg="https_proxy=$PROXY" \
+  --build-arg="APTPROXY=$APTPROXY" \
+  --build-arg="GOPROXY=$GOPROXY" \
   --file "$DOCKERFILE" \
-  --tag "$REGISTRY/$VENDOR/$IMAGE_NAME:$IMAGE_TAG" ${CACHE} "${PUSH}" "$@" "$root"
+  --tag "$REGISTRY/$VENDOR/$IMAGE_NAME:$IMAGE_TAG" ${CACHE} ${PUSH} "$@" "$root"
 
 build::getsha(){
   local image_name="$1"

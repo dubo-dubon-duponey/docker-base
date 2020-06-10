@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:4458242d4047319887f768f056630abdced4b81fccd1c2b5d56971d8f1df59ed
+ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6bee17b00f3c553bf274c3910dcefcfce14152c1c311
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
@@ -26,7 +26,7 @@ RUN           apt-get update -qq && \
 
 RUN           update-ca-certificates
 
-ENV           NODE_VERSION 10.20.1
+ENV           NODE_VERSION 10.21.0
 ENV           YARN_VERSION 1.22.2
 ENV           GOLANG_VERSION 1.13.12
 ENV           GOLANG_LINUX_AMD64_SHA512 ca834f5f08e4bf62d1f0999065e402615832612372a536014053b39c51ee73c4023fa9bd96d54eecd34ad7b5f15ed17ab5f9b7fbf70f6e06fb4ce9eb5502edd9

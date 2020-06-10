@@ -30,6 +30,12 @@ FROM          $BUILDER_BASE                                                     
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
 
+# CGO disabled by default for cross-compilation to work
+ONBUILD ARG   CGO_ENABLED=0
+# Modules are on by default
+ONBUILD ARG   GO111MODULE=on
+ONBUILD ARG   GOPROXY="https://proxy.golang.org"
+
 ARG           TARGETPLATFORM
 ARG           BUILDPLATFORM
 
@@ -70,7 +76,7 @@ RUN           apt-get update -qq && \
 COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
 
-ENV           NODE_VERSION 10.20.1
+ENV           NODE_VERSION 10.21.0
 ENV           YARN_VERSION 1.22.2
 ENV           GOLANG_VERSION 1.13.12
 
@@ -85,8 +91,6 @@ ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-# CGO disabled by default for cross-compilation to work
-ENV           GCO_ENABLED=0
 
 WORKDIR       $GOPATH
 

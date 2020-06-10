@@ -4,7 +4,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 
 # Which Debian version to use
-export DEBIAN_DATE=${DEBIAN_DATE:-2020-02-15}
+export DEBIAN_DATE=${DEBIAN_DATE:-2020-06-01}
 # Image name to push
 export IMAGE_NAME="${IMAGE_NAME:-base}"
 
@@ -12,17 +12,16 @@ export IMAGE_NAME="${IMAGE_NAME:-base}"
 export BUILDER_BASE="${BUILDER_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
 export RUNTIME_BASE="${RUNTIME_BASE:-docker.io/dubodubonduponey/debian:$DEBIAN_DATE}"
 
-PROXY="${PROXY:-}"
-
 refresh() {
   local cwd="$1"
   local base="$2"
 
+  PROXY="${PROXY:-}"
+  APTPROXY="${APTPROXY:-}"
   docker buildx build -f "$cwd"/Dockerfile.downloader \
     --build-arg "BUILDER_BASE=$base" \
     --tag local/dubodubonduponey/downloader \
-    --build-arg="http_proxy=$PROXY" \
-    --build-arg="https_proxy=$PROXY" \
+    --build-arg="APTPROXY=$APTPROXY" \
     --output type=docker \
     "$cwd"
 
@@ -44,7 +43,7 @@ export IMAGE_TAG="runtime-${DEBIAN_DATE}"
 export DOCKERFILE=Dockerfile.runtime
 
 # shellcheck source=/dev/null
-. "$root/helpers.sh"
+bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh"
 
 ## Builder
 
@@ -57,4 +56,4 @@ export DOCKERFILE=Dockerfile.builder
 export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 
 # shellcheck source=/dev/null
-. "$root/helpers.sh"
+bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh"

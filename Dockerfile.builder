@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:4458242d4047319887f768f056630abdced4b81fccd1c2b5d56971d8f1df59ed
+ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6bee17b00f3c553bf274c3910dcefcfce14152c1c311
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -14,7 +14,7 @@ ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
 ARG           LANG="C.UTF-8"
 ARG           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
+ARG           TZ="America/Los_Angeles"
 
 RUN           apt-get update -qq
 RUN           apt-get install -qq --no-install-recommends \
@@ -27,8 +27,19 @@ RUN           update-ca-certificates
 # hadolint ignore=DL3006
 FROM          $BUILDER_BASE                                                                                             AS builder
 
+ARG           TARGETPLATFORM
+ARG           BUILDPLATFORM
+
+ARG           DEBIAN_FRONTEND="noninteractive"
+ENV           TERM="xterm"
+ENV           LANG="C.UTF-8"
+ENV           LC_ALL="C.UTF-8"
+ENV           TZ="America/Los_Angeles"
+
+# Base
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0
@@ -36,14 +47,9 @@ ONBUILD ARG   CGO_ENABLED=0
 ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
-ARG           TARGETPLATFORM
-ARG           BUILDPLATFORM
-
-ENV           DEBIAN_FRONTEND="noninteractive"
-ENV           TERM="xterm"
-ENV           LANG="C.UTF-8"
-ENV           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
 
 ###########################################################
 # C++ and generic
@@ -76,14 +82,10 @@ RUN           apt-get update -qq && \
 COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
 
-ENV           NODE_VERSION 10.21.0
-ENV           YARN_VERSION 1.22.2
 ENV           GOLANG_VERSION 1.13.12
 
 # Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
-ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
-ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
 
 ###########################################################
 # Golang install
@@ -93,6 +95,33 @@ ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 WORKDIR       $GOPATH
+
+#######################
+# Actual "builder" image
+#######################
+# hadolint ignore=DL3006
+FROM          builder                                                                                                   AS builder-node
+
+# Base
+ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
+
+# CGO disabled by default for cross-compilation to work
+ONBUILD ARG   CGO_ENABLED=0
+# Modules are on by default
+ONBUILD ARG   GO111MODULE=on
+ONBUILD ARG   GOPROXY="https://proxy.golang.org"
+
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
+
+ENV           NODE_VERSION 10.21.0
+ENV           YARN_VERSION 1.22.2
+
+ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
+ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
 
 ###########################################################
 # Node and Yarn install

@@ -23,11 +23,11 @@ refresh() {
     --tag local/dubodubonduponey/downloader \
     --build-arg="APTPROXY=$APTPROXY" \
     --output type=docker \
-    "$cwd"
+    "$cwd/context/downloader"
 
   docker rm -f downloader 2>/dev/null || true
   export DOCKER_CONTENT_TRUST=0
-  docker run --rm --name downloader --env="http_proxy=$PROXY" --env="https_proxy=$PROXY" --volume "$cwd/cache:/cache" local/dubodubonduponey/downloader
+  docker run --rm --name downloader --env="http_proxy=$PROXY" --env="https_proxy=$PROXY" --volume "$cwd/context/builder/cache:/cache" local/dubodubonduponey/downloader
   export DOCKER_CONTENT_TRUST=1
 }
 
@@ -41,6 +41,7 @@ export DESCRIPTION="Base runtime image for all DBDBDP images"
 # Image tag to push
 export IMAGE_TAG="runtime-${DEBIAN_DATE}"
 export DOCKERFILE=Dockerfile.runtime
+export CONTEXT=context/runtime
 
 # shellcheck source=/dev/null
 bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh"
@@ -53,7 +54,20 @@ export DESCRIPTION="Base builder image for all DBDBDP images"
 # Image tag to push
 export IMAGE_TAG="builder-${DEBIAN_DATE}"
 export DOCKERFILE=Dockerfile.builder
-export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
+export CONTEXT=context/builder
 
 # shellcheck source=/dev/null
-bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh"
+bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh" --target builder
+
+# Title and description
+export TITLE="Dubo Builder with Node"
+export DESCRIPTION="Base builder image for all DBDBDP images (with node)"
+# Image tag to push
+export IMAGE_TAG="builder-node-${DEBIAN_DATE}"
+export DOCKERFILE=Dockerfile.builder
+# Node does not support armv6
+export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
+export CONTEXT=context/builder
+
+# shellcheck source=/dev/null
+bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh" --target builder-node

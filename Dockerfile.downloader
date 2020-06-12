@@ -6,9 +6,9 @@ ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6b
 FROM          $BUILDER_BASE                                                                                             AS downloader
 
 ARG           DEBIAN_FRONTEND="noninteractive"
-ARG           TERM="xterm"
-ARG           LANG="C.UTF-8"
-ARG           LC_ALL="C.UTF-8"
+ENV           TERM="xterm"
+ENV           LANG="C.UTF-8"
+ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
 # hadolint ignore=DL3009

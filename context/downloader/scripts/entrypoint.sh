@@ -13,7 +13,7 @@ init::golang(){
 }
 
 platforms::golang() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6"
 }
 
 checksum::golang() {

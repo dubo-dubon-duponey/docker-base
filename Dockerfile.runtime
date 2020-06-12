@@ -1,4 +1,4 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:4458242d4047319887f768f056630abdced4b81fccd1c2b5d56971d8f1df59ed
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6bee17b00f3c553bf274c3910dcefcfce14152c1c311
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -14,7 +14,7 @@ ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
 ARG           LANG="C.UTF-8"
 ARG           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
+ARG           TZ="America/Los_Angeles"
 
 RUN           apt-get update -qq
 RUN           apt-get install -qq --no-install-recommends \
@@ -34,7 +34,7 @@ RUN           update-ca-certificates
 # hadolint ignore=DL3006
 FROM          $RUNTIME_BASE                                                                                             AS runtime
 
-ENV           DEBIAN_FRONTEND="noninteractive"
+ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
@@ -46,6 +46,13 @@ ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 # The usefulness/security angle of this should be assessed.
 COPY          --from=runtime-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=runtime-builder /usr/share/ca-certificates /usr/share/ca-certificates
+
+# Base
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
+
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
 
 # Build args
 ONBUILD ARG   BUILD_UID=2000

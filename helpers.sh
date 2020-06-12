@@ -12,7 +12,7 @@ TITLE="${TITLE:-}"
 DESCRIPTION="${DESCRIPTION:-}"
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
 DEBIAN_DATE=${DEBIAN_DATE:-2020-01-01}
-DOCKERFILE="$root/${DOCKERFILE:-Dockerfile}"
+DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 BUILDER_BASE="${BUILDER_BASE:-dubodubonduponey/base:builder-${DEBIAN_DATE}}"
 RUNTIME_BASE="${RUNTIME_BASE:-dubodubonduponey/base:runtime-${DEBIAN_DATE}}"
 CONTEXT="${CONTEXT:-.}"
@@ -77,7 +77,7 @@ docker buildx build --pull --platform "$PLATFORMS" --build-arg="FAIL_WHEN_OUTDAT
   --build-arg="APTPROXY=$APTPROXY" \
   --build-arg="GOPROXY=$GOPROXY" \
   --build-arg="GO111MODULE=${GO111MODULE:-on}" \
-  --file "$DOCKERFILE" \
+  --file "$root/$DOCKERFILE" \
   --tag "$REGISTRY/$VENDOR/$IMAGE_NAME:$IMAGE_TAG" ${CACHE} ${PUSH} "$@" "$root/$CONTEXT"
 
 build::getsha(){

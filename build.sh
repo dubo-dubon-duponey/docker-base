@@ -44,7 +44,7 @@ export DOCKERFILE=Dockerfile.runtime
 export CONTEXT=context/runtime
 
 # shellcheck source=/dev/null
-bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh"
+. "$root/helpers.sh"
 
 ## Builder
 
@@ -57,7 +57,7 @@ export DOCKERFILE=Dockerfile.builder
 export CONTEXT=context/builder
 
 # shellcheck source=/dev/null
-bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh" --target builder
+. "$root/helpers.sh" --target builder
 
 # Title and description
 export TITLE="Dubo Builder with Node"
@@ -70,4 +70,4 @@ export PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 export CONTEXT=context/builder
 
 # shellcheck source=/dev/null
-bash "$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/helpers.sh" --target builder-node
+. "$root/helpers.sh" --target builder-node

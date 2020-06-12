@@ -69,6 +69,7 @@ RUN           apt-get update -qq && \
                 libtool=2.4.6-9 \
 		            pkg-config=0.29-6 \
                 python=2.7.16-1 \
+                python3=3.7.3-1 \
                 virtualenv=15.1.0+ds-2 \
                 jq=1.5+dfsg-2+b1 \
                 git=1:2.20.1-2+deb10u3 && \

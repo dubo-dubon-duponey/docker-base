@@ -31,7 +31,7 @@ DEBIAN_DATE=2020-01-01
 # If you want to use an entirely different Debian base
 BASE="docker.io/dubodubonduponey/debian:$DEBIAN_DATE"
 # If you want to control which platforms are being built
-PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 
 # Control resulting images naming
 REGISTRY="registry-1.docker.io"

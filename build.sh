@@ -18,7 +18,7 @@ refresh() {
 
   PROXY="${PROXY:-}"
   APTPROXY="${APTPROXY:-}"
-  docker buildx build -f "$cwd"/Dockerfile.downloader \
+  docker buildx build --pull -f "$cwd"/Dockerfile.downloader \
     --build-arg "BUILDER_BASE=$base" \
     --tag local/dubodubonduponey/downloader \
     --build-arg="APTPROXY=$APTPROXY" \

@@ -1,4 +1,4 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6bee17b00f3c553bf274c3910dcefcfce14152c1c311
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.

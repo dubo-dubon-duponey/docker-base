@@ -1,9 +1,10 @@
-ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:aebb31be4afadcaef79b6bee17b00f3c553bf274c3910dcefcfce14152c1c311
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
 # hadolint ignore=DL3006
-FROM          $BUILDER_BASE                                                                                             AS downloader
+FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS downloader-builder
+ARG           BUILDPLATFORM
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
@@ -14,15 +15,10 @@ ENV           TZ="America/Los_Angeles"
 # hadolint ignore=DL3009
 RUN           apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4+deb10u1 \
+                curl=7.64.0-4 \
                 gnupg=2.2.12-1+deb10u1 \
                 dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20190110 && \
-              apt-get -qq autoremove      && \
-              apt-get -qq clean           && \
-              rm -rf /var/lib/apt/lists/* && \
-              rm -rf /tmp/*               && \
-              rm -rf /var/tmp/*
+                ca-certificates=20190110
 
 RUN           update-ca-certificates
 
@@ -38,4 +34,7 @@ ENV           FAIL_WHEN_OUTDATED true
 
 COPY          ./scripts /scripts
 
-ENTRYPOINT    ["/scripts/entrypoint.sh"]
+RUN           /scripts/entrypoint.sh
+
+FROM          scratch                                                                                                   AS downloader
+COPY          --from=downloader-builder /cache /cache

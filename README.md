@@ -2,7 +2,7 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-06-15`):
+Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-07-01`):
 
  * `dubodubonduponey/base:runtime-$DEBIAN_SUITE-$DEBIAN_DATE`
     * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`, for suite `buster`)
@@ -14,8 +14,8 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form
  * `dubodubonduponey/base:builder-$DEBIAN_SUITE-$DEBIAN_DATE`
     * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`, for suite `buster`)
     * golang, python, and essential dev & build tools
+ * `dubodubonduponey/base:builder-node-$DEBIAN_SUITE-$DEBIAN_DATE`
     * nodejs + yarnpkg (except on arm/v6)
-    * ONBUILD version verification
 
 ## How to build
 
@@ -25,7 +25,7 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form
 ./build.sh downloader
 
 # Build and push the builders and runtime images
-VENDOR=you DEBIAN_DATE=2020-06-15 ./build.sh --push
+VENDOR=you DEBIAN_DATE=2020-07-01 ./build.sh --push
 ```
 
 ## Advanced build parameters
@@ -35,7 +35,7 @@ VENDOR=you DEBIAN_DATE=2020-06-15 ./build.sh --push
 APTPROXY=http://somewhere
 
 # Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
-DEBIAN_DATE=2020-06-15
+DEBIAN_DATE=2020-07-01
 # Debian version you want (only buster is tested currently)
 DEBIAN_SUITE=buster
 
@@ -43,7 +43,7 @@ DEBIAN_SUITE=buster
 REGISTRY="docker.io"
 VENDOR="dubodubonduponey"
 
-# If you want to use an entirely different Debian base - caution: you may have to adjust version inside the dockerfile as well as this might break!
+# If you want to use an entirely different Debian base - caution: you may have to adjust packages versions inside the dockerfile as well as this might break!
 BUILDER_BASE="registry/foo/bar:tag"
 RUNTIME_BASE="..."
 
@@ -61,7 +61,7 @@ RUNTIME_BASE="..."
 
 The downloader image will FAIL building if it detects a new patch release for golang, node or yarn.
 
-In that case, it will provide updated versions (and sha) to update in the dockerfile.
+In that case, it will display updated versions (and sha) to copy over in the dockerfile.
 
 Alternatively, you can pass `FAIL_WHEN_OUTDATED=` as a build arg to build with outdated versions.
 

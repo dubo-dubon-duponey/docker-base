@@ -15,7 +15,7 @@ variable "DEBIAN_SUITE" {
 }
 
 variable "PWD" {
-  default = ""
+  default = "."
 }
 
 variable "BUILDER_BASE" {

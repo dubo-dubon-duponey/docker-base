@@ -83,7 +83,7 @@ RUN           apt-get update -qq && \
 COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
 
-ENV           GOLANG_VERSION 1.13.12
+ENV           GOLANG_VERSION 1.13.13
 
 # Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang

@@ -1,136 +1,64 @@
-ARG           BASE=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
+ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
+#######################
+# "Builder"
+# This image is meant to provide basic files copied over directly into the base target image.
+# Right now:
+# - updated ca root
+#######################
 # hadolint ignore=DL3006
-FROM          $BASE                                                                                                     AS builder
+FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder-builder
 
 ARG           TARGETPLATFORM
 
-ENV           DEBIAN_FRONTEND="noninteractive"
+ARG           DEBIAN_FRONTEND="noninteractive"
+ARG           TERM="xterm"
+ARG           LANG="C.UTF-8"
+ARG           LC_ALL="C.UTF-8"
+ARG           TZ="America/Los_Angeles"
+
+RUN           apt-get update -qq
+RUN           apt-get install -qq --no-install-recommends \
+                ca-certificates=20190110
+RUN           update-ca-certificates
+
+#######################
+# Actual "builder" image
+#######################
+# hadolint ignore=DL3006
+FROM          $BUILDER_BASE                                                                                             AS builder
+
+ARG           TARGETPLATFORM
+ARG           BUILDPLATFORM
+
+ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-# hadolint ignore=DL3009
-RUN           apt-get update -qq \
-              && apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4 \
-                gnupg=2.2.12-1+deb10u1 \
-                dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20190110
+# Base
+ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
-RUN           update-ca-certificates
-
-###########################################################
-# Golang
-###########################################################
-ENV           GOLANG_VERSION 1.13.5
-ENV           GOLANG_AMD64_SHA512 738019bbf217507f16e8bade6eda3a6114fac9f0802d42b644f9c9699d72796b5a28f5bcbdcefa84fcf4455c054961df358dc6fb5ff66c2867b7ab8f519cf3ae
-ENV           GOLANG_ARM64_SHA512 9da20417f7e999c3186c2e588af587381bc7f686f06ca9f1ac93b674e29ef959b0223fdd27d3aa4e7857e491063845982c38b2109011bbf469576c8b32eae5b9
-ENV           GOLANG_ARMV6L_SHA512 12d069ab66bdc8d6171dc423d964c704bce1be69b1652ddb78d5f7ff2e3b7d548ff56419b905edd041cbe00f5dd98f45346186b614988d02e896fed922b2de5b
-
-###########################################################
-# Node
-###########################################################
-ENV           NODE_VERSION 10.17.0
-ENV           YARN_VERSION 1.21.1
-
-ARG           FAIL_WHEN_OUTDATED="true"
-
-# This massive nonsense serves only a gentle purpose: check if we should be running a more recent version of golang, and annoy everybody consuming our image if we should.
-COPY          ./scripts /scripts
-
-RUN           /scripts/version-check.sh
-
-###########################################################
-# Golang build
-###########################################################
-ENV           GOPATH=/build/golang/source
-ENV           GOROOT=/build/golang/go
-ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 # CGO disabled by default for cross-compilation to work
-ENV           GCO_ENABLED=0
+ONBUILD ARG   CGO_ENABLED=0
+# Modules are on by default
+ONBUILD ARG   GO111MODULE=on
+ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
-WORKDIR       /build/golang
-
-# hadolint ignore=DL4006
-RUN           set -eu; \
-              arch="$(dpkg --print-architecture)"; \
-              case "${arch##*-}" in \
-                amd64) arch='linux-amd64'; checksum="$GOLANG_AMD64_SHA512" ;; \
-                arm64) arch='linux-arm64'; checksum="$GOLANG_ARM64_SHA512" ;; \
-            		armel) arch='linux-armv6l'; checksum="$GOLANG_ARMV6L_SHA512" ;; \
-            		armhf) arch='linux-armv6l'; checksum="$GOLANG_ARMV6L_SHA512" ;; \
-            		*) echo "unsupported architecture ${arch##*-}"; exit 1;; \
-              esac; \
-              # If using QEMU on a glibc system, cacerts are broken. Ignoring tls errors here for now - safeguarded by checksum verification
-              curl -k -fsSL -o go.tar.gz "https://dl.google.com/go/go${GOLANG_VERSION}.${arch}.tar.gz"; \
-              printf "%s *go.tar.gz" "$checksum" | sha512sum -c -; \
-              tar -xzf go.tar.gz; \
-              rm go.tar.gz; \
-              mkdir -p "$GOPATH/src" "$GOPATH/bin"
-
-WORKDIR       $GOPATH
-
-###########################################################
-# Node build
-###########################################################
-# hadolint ignore=DL4006
-RUN           set -eu; \
-              arch="$(dpkg --print-architecture)"; \
-              if [ "${arch##*-}" != "armel" ]; then \
-                case "${arch##*-}" in \
-                  amd64) arch='x64';; \
-                  arm64) arch='arm64';; \
-                  armhf) arch='armv7l';; \
-                  *) echo "unsupported architecture ${arch##*-}"; exit 1;; \
-                esac; \
-                for key in \
-                  94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-                  FD3A5288F042B6850C66B31F09FE44734EB7990E \
-                  71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-                  DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-                  C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-                  B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-                  77984A986EBC2AA786BC0F66B01FBB92821C587A \
-                  8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
-                  4ED778F539E3634C779C87C6D7062848A1AB005C \
-                  A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
-                  B9E2F5981AA6E0CD28160D9FF13993A75599653C \
-                ; do \
-                  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
-                  gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-                  gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
-                done; \
-                curl -k -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$arch.tar.gz"; \
-                curl -k -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc"; \
-                gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc; \
-                grep " node-v$NODE_VERSION-linux-$arch.tar.gz\$" SHASUMS256.txt | sha256sum -c -; \
-                tar -xzf "node-v$NODE_VERSION-linux-$arch.tar.gz" -C /usr/local --strip-components=1 --no-same-owner; \
-                rm "node-v$NODE_VERSION-linux-$arch.tar.gz" SHASUMS256.txt.asc SHASUMS256.txt; \
-                ln -s /usr/local/bin/node /usr/local/bin/nodejs; \
-              fi
-
-RUN           set -eu; \
-              arch="$(dpkg --print-architecture)"; \
-              if [ "${arch##*-}" != "armel" ]; then \
-                gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5" || \
-                gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5" || \
-                gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "6A010C5166006599AA17F08146C2130DFD2497F5"; \
-                curl -k -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz"; \
-                curl -k -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc"; \
-                gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz; \
-                mkdir -p /opt; \
-                tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/; \
-                ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn; \
-                ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg; \
-                rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz; \
-              fi
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
 
 ###########################################################
 # C++ and generic
+# Generic development stuff
+# Python
 ###########################################################
 # For CGO
-RUN           apt-get install -qq --no-install-recommends \
+RUN           apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
                 g++=4:8.3.0-1 \
                 gcc=4:8.3.0-1 \
                 libc6-dev=2.28-10 \
@@ -139,22 +67,68 @@ RUN           apt-get install -qq --no-install-recommends \
                 autoconf=2.69-11 \
                 automake=1:1.16.1-4 \
                 libtool=2.4.6-9 \
-		            pkg-config=0.29-6
-
-# Generic development stuff
-RUN           apt-get install -qq --no-install-recommends \
-                jq=1.5+dfsg-2+b1 \
-                git=1:2.20.1-2
-
-###########################################################
-# Python
-###########################################################
-RUN           apt-get install -qq --no-install-recommends \
+		            pkg-config=0.29-6 \
                 python=2.7.16-1 \
-                virtualenv=15.1.0+ds-2
+                python3=3.7.3-1 \
+                virtualenv=15.1.0+ds-2 \
+                jq=1.5+dfsg-2+b1 \
+                git=1:2.20.1-2+deb10u3 && \
+              apt-get -qq autoremove      && \
+              apt-get -qq clean           && \
+              rm -rf /var/lib/apt/lists/* && \
+              rm -rf /tmp/*               && \
+              rm -rf /var/tmp/*
 
+# The usefulness/security angle of this should be assessed.
+COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
+COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
+
+ENV           GOLANG_VERSION 1.13.13
+
+# Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
+ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
+
+###########################################################
+# Golang install
+###########################################################
+ENV           GOPATH=/build/golang/source
+ENV           GOROOT=/build/golang/go
+ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+WORKDIR       $GOPATH
+
+#######################
+# Actual "builder" image (with node)
+#######################
+# hadolint ignore=DL3006
+FROM          builder                                                                                                   AS builder-node
+
+# Base
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   FAIL_WHEN_OUTDATED="true"
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
-ONBUILD RUN   /scripts/version-check.sh
+# CGO disabled by default for cross-compilation to work
+ONBUILD ARG   CGO_ENABLED=0
+# Modules are on by default
+ONBUILD ARG   GO111MODULE=on
+ONBUILD ARG   GOPROXY="https://proxy.golang.org"
+
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
+
+ENV           NODE_VERSION 10.21.0
+ENV           YARN_VERSION 1.22.2
+
+ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
+ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
+
+###########################################################
+# Node and Yarn install
+###########################################################
+RUN           set -eu; \
+              ln -s /opt/node-*/bin/* /usr/local/bin/; \
+              ln -s /opt/yarn-*/bin/yarn /usr/local/bin/; \
+              ln -s /opt/yarn-*/bin/yarnpkg /usr/local/bin/; \
+              ln -s /usr/local/bin/node /usr/local/bin/nodejs

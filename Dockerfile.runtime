@@ -1,18 +1,20 @@
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
 #######################
-# Runtime "builder"
-# This image is meant to provide basic files for all runtime images, copied over directly into the base runtime image.
+# "Builder"
+# This image is meant to provide basic files copied over directly into the base target image.
 # Right now:
 # - updated ca root
 #######################
-ARG           BASE=dubodubonduponey/debian@sha256:96a576f7ea067283150a43a78c10ebfc1eff502ac5a4010dabafefa4a178ee1e
 # hadolint ignore=DL3006
-FROM          $BASE                                                                                                     AS runtime-builder
+FROM          --platform=$BUILDPLATFORM $RUNTIME_BASE                                                                   AS runtime-builder
+
+ARG           TARGETPLATFORM
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
 ARG           LANG="C.UTF-8"
 ARG           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
+ARG           TZ="America/Los_Angeles"
 
 RUN           apt-get update -qq
 RUN           apt-get install -qq --no-install-recommends \
@@ -30,9 +32,9 @@ RUN           update-ca-certificates
 # - automatic entrypoint definition and user setting
 #######################
 # hadolint ignore=DL3006
-FROM          $BASE                                                                                                     AS runtime
+FROM          $RUNTIME_BASE                                                                                             AS runtime
 
-ENV           DEBIAN_FRONTEND="noninteractive"
+ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
@@ -44,6 +46,13 @@ ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 # The usefulness/security angle of this should be assessed.
 COPY          --from=runtime-builder /etc/ssl/certs /etc/ssl/certs
 COPY          --from=runtime-builder /usr/share/ca-certificates /usr/share/ca-certificates
+
+# Base
+ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
+
+# Since the same statement from Debian is already enshrined, make sure we override it for descendants
+ONBUILD ARG   APTPROXY=""
+ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
 
 # Build args
 ONBUILD ARG   BUILD_UID=2000
@@ -82,6 +91,7 @@ ONBUILD COPY  runtime  /
 # Write is granted, although that doesn't really matter in term of security
 
 # Create a restricted user account (no shell, no home, disabled)
+# XXX it seems this is busting docker build cache capabilities... builds are not cached anymore after that... which is annoying when there is large dependencies (ffmpeg)
 ONBUILD RUN   set -eu; \
               adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid $BUILD_UID \

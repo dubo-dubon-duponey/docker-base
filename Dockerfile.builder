@@ -33,6 +33,7 @@ RUN           set -eu; \
 # Export of the above
 ########################################################################################################################
 FROM          scratch                                                                                                   AS overlay
+# hadolint ignore=DL3010
 COPY          --from=overlay-builder /overlay.tar /overlay.tar
 
 #######################

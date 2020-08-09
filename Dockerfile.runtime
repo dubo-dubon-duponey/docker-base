@@ -75,7 +75,7 @@ ONBUILD COPY  runtime  /
 # XXX it seems this may be busting docker build cache capabilities... builds are not cached anymore after that... which is annoying when there is large dependencies (ffmpeg)
 # XXX this was changed dramatically - is this problem still true?
 ONBUILD RUN   set -eu; \
-              [ "$BUILD_UID" == 2000 ] || usermod -u "$BUILD_UID" dubo-dubon-duponey; \
+              [ "$BUILD_UID" -eq "2000" ] || usermod -u "$BUILD_UID" dubo-dubon-duponey; \
               chown -R $BUILD_UID:root /boot; \
               chown -R $BUILD_UID:root /config; \
               chown -R $BUILD_UID:root /data; \

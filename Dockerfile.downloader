@@ -1,10 +1,12 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73
+
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
 # hadolint ignore=DL3006
-FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS downloader-builder
-ARG           BUILDPLATFORM
+FROM          $BUILDER_BASE                                                                                             AS downloader-builder
+
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
@@ -12,29 +14,36 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-# hadolint ignore=DL3009
-RUN           apt-get update -qq && \
-              apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4 \
-                gnupg=2.2.12-1+deb10u1 \
-                dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20190110
-
-RUN           update-ca-certificates
-
-ENV           NODE_VERSION 10.21.0
-ENV           YARN_VERSION 1.22.2
-ENV           GOLANG_VERSION 1.13.13
-ENV           GOLANG_LINUX_AMD64_SHA512 b3bfe18e0b69eb2ce69c097c74bd267eb9685fca867d813ad92fd550042b84f7f1e41e58937125a83da0c214091a8a7700143104e5cc4033162a023c9d0e9038
-ENV           GOLANG_LINUX_ARM64_SHA512 9b9982027fdd2e259bb8df376a3d9156338a9958e2d4b0f44180167fcd89fe256631e860c09526c96d45e622fafcdff1e43b0de1a99af9846196aa49a41242ca
-ENV           GOLANG_LINUX_ARM_V7_SHA512 1404766eb547535618e456e3b228989ee04cdb487fcbdc498ede4d40e968baccfa8dc1f0038abf109bb82988893842d5b5ac02d9350653a32a487b0055a2c896
-ENV           GOLANG_LINUX_ARM_V6_SHA512 1404766eb547535618e456e3b228989ee04cdb487fcbdc498ede4d40e968baccfa8dc1f0038abf109bb82988893842d5b5ac02d9350653a32a487b0055a2c896
+ENV           NODE_VERSION 10.22.0
+ENV           YARN_VERSION 1.22.4
+ENV           GOLANG_VERSION 1.13.14
+ENV           GOLANG_LINUX_AMD64_SHA512 2d32ea2246e71eebf6ec3ec86f8f63a6bf32225a01cea0a1c86f000f0eb9f91172f86e085b3a764cfcdcdbffc17a3d0d0fa851e81bbb653777a0ca8809d386c5
+ENV           GOLANG_LINUX_ARM64_SHA512 6e61fa7a90770636be2f6e801d5b322b3aaa29c3b79d106a4407a29179946ef745954eca6fc0e1e70c4ace974fd6c4875b5a0dd6ab054a792a809f855675bdbe
+ENV           GOLANG_LINUX_ARM_V7_SHA512 e97615493cff3c4b48fc948a433bbaf339fcfda712aa4c8d2bfd82424807a45b0d0774db1faa1498d9130978f56749e5fd89423d44dae31ece3a914dd10647cc
+ENV           GOLANG_LINUX_ARM_V6_SHA512 e97615493cff3c4b48fc948a433bbaf339fcfda712aa4c8d2bfd82424807a45b0d0774db1faa1498d9130978f56749e5fd89423d44dae31ece3a914dd10647cc
 
 ENV           FAIL_WHEN_OUTDATED true
 
 COPY          ./scripts /scripts
 
+# hadolint ignore=DL3009
+RUN           set -eu; \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
+                curl=7.64.0-4+deb10u1 \
+                gnupg=2.2.12-1+deb10u1 \
+                dirmngr=2.2.12-1+deb10u1 \
+                ca-certificates=20200601~deb10u1
+
+RUN           update-ca-certificates
+
+COPY          ./cache /cache
+
 RUN           /scripts/entrypoint.sh
 
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /cache -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
 FROM          scratch                                                                                                   AS downloader
+
 COPY          --from=downloader-builder /cache /cache

@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
+ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -6,9 +6,9 @@ ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52
 # - updated ca root
 #######################
 # hadolint ignore=DL3006
-FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder-builder
+FROM          $BUILDER_BASE                                                                   AS overlay-builder
 
-ARG           TARGETPLATFORM
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ARG           TERM="xterm"
@@ -18,8 +18,22 @@ ARG           TZ="America/Los_Angeles"
 
 RUN           apt-get update -qq
 RUN           apt-get install -qq --no-install-recommends \
-                ca-certificates=20190110
+                ca-certificates=20200601~deb10u1
 RUN           update-ca-certificates
+
+RUN           set -eu; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
+RUN           set -eu; \
+              tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
+
+########################################################################################################################
+# Export of the above
+########################################################################################################################
+FROM          scratch                                                                                                   AS overlay
+COPY          --from=overlay-builder /overlay.tar /overlay.tar
 
 #######################
 # Actual "builder" image
@@ -36,6 +50,11 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
+ENV           GOLANG_VERSION 1.13.14
+ENV           GOPATH=/build/golang/source
+ENV           GOROOT=/build/golang/go
+ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
 # Base
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
@@ -43,13 +62,14 @@ ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0
+
 # Modules are on by default
 ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
-# Since the same statement from Debian is already enshrined, make sure we override it for descendants
-ONBUILD ARG   APTPROXY=""
-ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
+# Apt behavior
+ONBUILD ARG   APTPROXY
+ONBUILD ARG   APTOPTIONS="Acquire::Check-Valid-Until=no"
 
 ###########################################################
 # C++ and generic
@@ -63,7 +83,7 @@ RUN           apt-get update -qq && \
                 gcc=4:8.3.0-1 \
                 libc6-dev=2.28-10 \
                 make=4.2.1-1.2 \
-                build-essential=12.6 \
+                dpkg-dev=1.19.7 \
                 autoconf=2.69-11 \
                 automake=1:1.16.1-4 \
                 libtool=2.4.6-9 \
@@ -72,6 +92,7 @@ RUN           apt-get update -qq && \
                 python3=3.7.3-1 \
                 virtualenv=15.1.0+ds-2 \
                 jq=1.5+dfsg-2+b1 \
+                curl=7.64.0-4+deb10u1 \
                 git=1:2.20.1-2+deb10u3 && \
               apt-get -qq autoremove      && \
               apt-get -qq clean           && \
@@ -80,21 +101,9 @@ RUN           apt-get update -qq && \
               rm -rf /var/tmp/*
 
 # The usefulness/security angle of this should be assessed.
-COPY          --from=builder-builder /etc/ssl/certs /etc/ssl/certs
-COPY          --from=builder-builder /usr/share/ca-certificates /usr/share/ca-certificates
+ADD           ./overlay/overlay.tar /
 
-ENV           GOLANG_VERSION 1.13.13
-
-# Bring in the cache for that platform - XXX this may become messy if people do not clean their cache
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
-
-###########################################################
-# Golang install
-###########################################################
-ENV           GOPATH=/build/golang/source
-ENV           GOROOT=/build/golang/go
-ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
 WORKDIR       $GOPATH
 
 #######################
@@ -114,12 +123,12 @@ ONBUILD ARG   CGO_ENABLED=0
 ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
-# Since the same statement from Debian is already enshrined, make sure we override it for descendants
-ONBUILD ARG   APTPROXY=""
-ONBUILD RUN   printf 'Acquire::HTTP::proxy "%s";\n' "$APTPROXY" > /etc/apt/apt.conf.d/99-dbdbdp-proxy.conf
+# Apt behavior
+ONBUILD ARG   APTPROXY
+ONBUILD ARG   APTOPTIONS="Acquire::Check-Valid-Until=no"
 
-ENV           NODE_VERSION 10.21.0
-ENV           YARN_VERSION 1.22.2
+ENV           NODE_VERSION 10.22.0
+ENV           YARN_VERSION 1.22.4
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt

@@ -8,6 +8,12 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
 # shellcheck source=/dev/null
 . "$root/version_check.sh"
 
+gpgopts=()
+if [ "${http_proxy:-}" ]; then
+  gpgopts+=(--keyserver-options "http-proxy=$http_proxy")
+fi
+gpgopts+=(--recv-keys)
+
 init::golang(){
   logger::debug "Golang: nothing to init"
 }
@@ -68,9 +74,9 @@ init::node() {
     A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
     B9E2F5981AA6E0CD28160D9FF13993A75599653C; do
     logger::debug "Importing Node key $key"
-    gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" 2>/dev/null ||
-      gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" 2>/dev/null  ||
-      gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" 2>/dev/null
+    gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
+      gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
+      gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
     gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
   done
 }
@@ -134,9 +140,9 @@ init::yarn() {
   # First key is for Yarn, the rest for Node
   local key=6A010C5166006599AA17F08146C2130DFD2497F5
   logger::debug "Importing Yarn key $key"
-  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" 2>/dev/null ||
-    gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" 2>/dev/null ||
-    gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" 2>/dev/null
+  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
+    gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
+    gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
   gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
 }
 

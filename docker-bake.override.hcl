@@ -40,16 +40,33 @@ group "default" {
 target "downloader" {
   inherits = ["shared"]
   dockerfile = "${PWD}/Dockerfile.downloader"
-  context = "${PWD}/context/downloader"
+  context = "${PWD}/context/builder"
+  target = "downloader"
   tags = []
-  platforms = ["local"]
+  platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "docker.io/dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73"
   }
   output = [
     "${PWD}/context/builder",
   ]
 }
+
+target "overlay" {
+  inherits = ["shared"]
+  dockerfile = "${PWD}/Dockerfile.builder"
+  context = "${PWD}/context/empty"
+  target = "overlay"
+  tags = []
+  platforms = ["linux/amd64"]
+  args = {
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73"
+  }
+  output = [
+    "${PWD}/context/builder/overlay",
+  ]
+}
+
 
 target "builder" {
   inherits = ["shared", "base-shared"]
@@ -88,7 +105,7 @@ target "builder-node" {
 target "runtime" {
   inherits = ["shared", "base-shared"]
   dockerfile = "${PWD}/Dockerfile.runtime"
-  context = "${PWD}/context/runtime"
+  context = "${PWD}/context/builder/overlay"
   args = {
     BUILD_TITLE = "Dubo Runtime"
     BUILD_DESCRIPTION = "Base runtime image for all DBDBDP images"

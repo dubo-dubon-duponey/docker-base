@@ -14,7 +14,10 @@ if ! shellcheck ./*.sh*; then
 fi
 
 if [ ! "$TEST_DOES_NOT_BUILD" ]; then
+  # XXX fix this please
+  mkdir -p context/builder/cache
   ./build.sh --progress plain downloader
+  ./build.sh --progress plain overlay
   ./build.sh --progress plain builder
   ./build.sh --progress plain builder-node
   ./build.sh --progress plain runtime

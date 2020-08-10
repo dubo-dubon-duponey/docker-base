@@ -61,6 +61,9 @@ ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
+ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
+ONBUILD ARG   BUILD_VERSION="unknown"
+
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0
 
@@ -117,6 +120,9 @@ FROM          builder                                                           
 ONBUILD ARG   TARGETPLATFORM
 ONBUILD ARG   BUILDPLATFORM
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
+
+ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
+ONBUILD ARG   BUILD_VERSION="unknown"
 
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0

@@ -1,4 +1,5 @@
-ARG           BUILDER_BASE=dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c
+
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -63,6 +64,7 @@ ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ONBUILD ARG   BUILD_VERSION="unknown"
+ONBUILD ARG   BUILD_REVISION="unknown"
 
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0
@@ -72,8 +74,12 @@ ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
 # Apt behavior
-ONBUILD ARG   APTPROXY
-ONBUILD ARG   APTOPTIONS="Acquire::Check-Valid-Until=no"
+ONBUILD ARG   APT_OPTIONS
+ONBUILD ARG   APT_SOURCES
+ONBUILD ARG   APT_TRUSTED
+
+ONBUILD ARG   http_proxy
+ONBUILD ARG   https_proxy
 
 ###########################################################
 # C++ and generic
@@ -123,6 +129,7 @@ ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ONBUILD ARG   BUILD_VERSION="unknown"
+ONBUILD ARG   BUILD_REVISION="unknown"
 
 # CGO disabled by default for cross-compilation to work
 ONBUILD ARG   CGO_ENABLED=0
@@ -131,8 +138,12 @@ ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
 # Apt behavior
-ONBUILD ARG   APTPROXY
-ONBUILD ARG   APTOPTIONS="Acquire::Check-Valid-Until=no"
+ONBUILD ARG   APT_OPTIONS
+ONBUILD ARG   APT_SOURCES
+ONBUILD ARG   APT_TRUSTED
+
+ONBUILD ARG   http_proxy
+ONBUILD ARG   https_proxy
 
 ENV           NODE_VERSION 10.22.0
 ENV           YARN_VERSION 1.22.4

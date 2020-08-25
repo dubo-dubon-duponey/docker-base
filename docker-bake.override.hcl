@@ -6,12 +6,17 @@ variable "VENDOR" {
   default = "dubodubonduponey"
 }
 
-variable "DEBIAN_DATE" {
+variable "DEBOOTSTRAP_DATE" {
   default = "2020-01-01"
 }
 
-variable "DEBIAN_SUITE" {
+variable "DEBOOTSTRAP_SUITE" {
   default = "buster"
+}
+
+variable "APT_OPTIONS" {
+  # Downloader likely uses old-ish images, which is not a problem
+  default = "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
 }
 
 variable "PWD" {
@@ -28,8 +33,8 @@ variable "RUNTIME_BASE" {
 
 target "base-shared" {
   args = {
-    BUILDER_BASE = "${equal(BUILDER_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBIAN_SUITE}-${DEBIAN_DATE}" : "${BUILDER_BASE}"}"
-    RUNTIME_BASE = "${equal(RUNTIME_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBIAN_SUITE}-${DEBIAN_DATE}" : "${RUNTIME_BASE}"}"
+    BUILDER_BASE = "${equal(BUILDER_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${BUILDER_BASE}"}"
+    RUNTIME_BASE = "${equal(RUNTIME_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${RUNTIME_BASE}"}"
   }
 }
 
@@ -45,7 +50,8 @@ target "downloader" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73"
+    APT_OPTIONS = "${APT_OPTIONS}"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c"
   }
   output = [
     "${PWD}/context/builder",
@@ -60,7 +66,7 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c"
   }
   output = [
     "${PWD}/context/builder/overlay",
@@ -77,7 +83,7 @@ target "builder" {
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images"
   }
   tags = [
-    "${REGISTRY}/${VENDOR}/base:builder-${DEBIAN_SUITE}-${DEBIAN_DATE}",
+    "${REGISTRY}/${VENDOR}/base:builder-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",
   ]
   target = "builder"
 }
@@ -97,7 +103,7 @@ target "builder-node" {
     "linux/arm/v7",
   ]
   tags = [
-    "${REGISTRY}/${VENDOR}/base:builder-node-${DEBIAN_SUITE}-${DEBIAN_DATE}",
+    "${REGISTRY}/${VENDOR}/base:builder-node-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",
   ]
   target = "builder-node"
 }
@@ -111,6 +117,6 @@ target "runtime" {
     BUILD_DESCRIPTION = "Base runtime image for all DBDBDP images"
   }
   tags = [
-    "${REGISTRY}/${VENDOR}/base:runtime-${DEBIAN_SUITE}-${DEBIAN_DATE}",
+    "${REGISTRY}/${VENDOR}/base:runtime-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",
   ]
 }

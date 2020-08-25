@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
@@ -24,8 +24,6 @@ ENV           GOLANG_LINUX_ARM_V6_SHA512 fc937182628fe218026a28b53dad5f867e1f3eb
 
 ENV           FAIL_WHEN_OUTDATED true
 
-COPY          ./scripts /scripts
-
 # hadolint ignore=DL3009
 RUN           set -eu; \
               apt-get update -qq && \
@@ -36,6 +34,8 @@ RUN           set -eu; \
                 ca-certificates=20200601~deb10u1
 
 RUN           update-ca-certificates
+
+COPY          ./scripts /scripts
 
 COPY          ./cache /cache
 

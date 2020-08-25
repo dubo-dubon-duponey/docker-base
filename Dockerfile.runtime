@@ -1,4 +1,4 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:87fcbc5d89e3a85fb43752c96352d6071519479b41eac15e4128118e250b4b73
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c
 #######################
 # Runtime base
 # Base image for all runtime environments.
@@ -25,17 +25,21 @@ ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 
 # Apt behavior
-ONBUILD ARG   APTPROXY
-ONBUILD ARG   APTOPTIONS="Acquire::Check-Valid-Until=no"
+ONBUILD ARG   APT_OPTIONS
+ONBUILD ARG   APT_SOURCES
+ONBUILD ARG   APT_TRUSTED
+
+ONBUILD ARG   http_proxy
+ONBUILD ARG   https_proxy
 
 # Build args
 ONBUILD ARG   BUILD_UID=2000
 
 # Labels build args
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
-ONBUILD ARG   BUILD_URL="https://github.com/dubodubonduponey/nonexistent"
-ONBUILD ARG   BUILD_DOCUMENTATION="https://github.com/dubodubonduponey/nonexistent"
-ONBUILD ARG   BUILD_SOURCE="https://github.com/dubodubonduponey/nonexistent"
+ONBUILD ARG   BUILD_URL="https://github.com/dubo-dubon-duponey/nonexistent"
+ONBUILD ARG   BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/nonexistent"
+ONBUILD ARG   BUILD_SOURCE="https://github.com/dubo-dubon-duponey/nonexistent"
 ONBUILD ARG   BUILD_VERSION="unknown"
 ONBUILD ARG   BUILD_REVISION="unknown"
 ONBUILD ARG   BUILD_VENDOR="dubodubonduponey"
@@ -60,34 +64,41 @@ ONBUILD LABEL org.opencontainers.image.description="$BUILD_DESCRIPTION"
 # The usefulness/security angle of this should be assessed.
 ADD           ./overlay.tar /
 
-# Create a restricted user account (no shell, no home, disabled)
+# Create a restricted user account (no shell, no home, disabled), and add folders
 RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid 2000 \
-                dubo-dubon-duponey \
-              && mkdir -p /boot \
-              && mkdir -p /config \
-              && mkdir -p /data \
-              && mkdir -p /certs
+                dubo-dubon-duponey; \
+              mkdir -p /boot; \
+              mkdir -p /config; \
+              mkdir -p /data; \
+              mkdir -p /certs; \
+              chown -R 2000:root /boot; \
+              chown -R 2000:root /config; \
+              chown -R 2000:root /data; \
+              chown -R 2000:root /certs; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              touch --no-dereference --date="@$epoch" /boot; \
+              touch --no-dereference --date="@$epoch" /config; \
+              touch --no-dereference --date="@$epoch" /data; \
+              touch --no-dereference --date="@$epoch" /certs;
 
 # Get all relevant files from onbuild
-ONBUILD COPY  runtime  /
+ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
 
 # XXX it seems this may be busting docker build cache capabilities... builds are not cached anymore after that... which is annoying when there is large dependencies (ffmpeg)
 # XXX this was changed dramatically - is this problem still true?
-ONBUILD RUN   set -eu; \
-              [ "$BUILD_UID" -eq "2000" ] || usermod -u "$BUILD_UID" dubo-dubon-duponey; \
-              chown -R $BUILD_UID:root /boot; \
-              chown -R $BUILD_UID:root /config; \
-              chown -R $BUILD_UID:root /data; \
-              chown -R $BUILD_UID:root /certs;
-
-# Finally downgrade to system user
-ONBUILD USER  dubo-dubon-duponey
-
 # Setup directories and permissions
 # The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
 # Write is granted, although that doesn't really matter in term of security
-ONBUILD RUN   find /boot   -type d -exec chmod -R 555 {} +; \
+ONBUILD RUN   set -eu; \
+              [ "$BUILD_UID" -eq "2000" ] || { \
+                usermod -u "$BUILD_UID" dubo-dubon-duponey; \
+                chown -R $BUILD_UID:root /boot; \
+                chown -R $BUILD_UID:root /config; \
+                chown -R $BUILD_UID:root /data; \
+                chown -R $BUILD_UID:root /certs; \
+              } \
+              find /boot   -type d -exec chmod -R 555 {} +; \
               find /config -type d -exec chmod -R 555 {} +; \
               find /data   -type d -exec chmod -R 777 {} +; \
               find /certs  -type d -exec chmod -R 777 {} +; \
@@ -100,5 +111,8 @@ ONBUILD RUN   find /boot   -type d -exec chmod -R 555 {} +; \
               find /config -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /data -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
+# Finally downgrade to system user
+ONBUILD USER  dubo-dubon-duponey
 
 ENTRYPOINT  ["/boot/entrypoint.sh"]

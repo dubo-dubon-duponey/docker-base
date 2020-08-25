@@ -2,19 +2,19 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-07-01`):
+Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBOOTSTRAP_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-07-01`):
 
- * `dubodubonduponey/base:runtime-$DEBIAN_SUITE-$DEBIAN_DATE`
-    * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`, for suite `buster`)
+ * `dubodubonduponey/base:runtime-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
+    * based on our debootstrapped version of Debian Buster (at `$DEBOOTSTRAP_DATE`, for suite `buster`)
     * labels
     * ca-certificates copied over
     * ONBUILD instructions to copy over runtime folders
     * user creation
     * entrypoint definition
- * `dubodubonduponey/base:builder-$DEBIAN_SUITE-$DEBIAN_DATE`
-    * based on our debootstrapped version of Debian Buster (at `$DEBIAN_DATE`, for suite `buster`)
+ * `dubodubonduponey/base:builder-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
+    * based on our debootstrapped version of Debian Buster (at `$DEBOOTSTRAP_DATE`, for suite `buster`)
     * golang, python, and essential dev & build tools
- * `dubodubonduponey/base:builder-node-$DEBIAN_SUITE-$DEBIAN_DATE`
+ * `dubodubonduponey/base:builder-node-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
     * nodejs + yarnpkg (except on arm/v6)
 
 ## How to build
@@ -25,7 +25,7 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBIAN_DATE` in the form
 ./build.sh downloader
 
 # Build and push the builders and runtime images
-VENDOR=you DEBIAN_DATE=2020-07-01 ./build.sh --push
+VENDOR=you DEBOOTSTRAP_DATE=2020-07-01 ./build.sh --push
 ```
 
 ## Advanced build parameters
@@ -35,9 +35,9 @@ VENDOR=you DEBIAN_DATE=2020-07-01 ./build.sh --push
 APTPROXY=http://somewhere
 
 # Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
-DEBIAN_DATE=2020-07-01
+DEBOOTSTRAP_DATE=2020-07-01
 # Debian version you want (only buster is tested currently)
-DEBIAN_SUITE=buster
+DEBOOTSTRAP_SUITE=buster
 
 # destination for your final Debian image - defaults to Docker Hub if left unspecified
 REGISTRY="docker.io"

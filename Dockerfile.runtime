@@ -97,7 +97,7 @@ ONBUILD RUN   set -eu; \
                 chown -R $BUILD_UID:root /config; \
                 chown -R $BUILD_UID:root /data; \
                 chown -R $BUILD_UID:root /certs; \
-              } \
+              }; \
               find /boot   -type d -exec chmod -R 555 {} +; \
               find /config -type d -exec chmod -R 555 {} +; \
               find /data   -type d -exec chmod -R 777 {} +; \

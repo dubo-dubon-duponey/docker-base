@@ -185,7 +185,7 @@ for product in golang node yarn; do
     cache::download "$platform" "$binary" "$(url::"$product" "$platform" "$version")"
 
     checksum::"$product" "$platform" "$version" "$binary" || {
-      logger::error "Checksum FAIL! Deleting artifact ($product $platform $version: $binary)"
+      logger::error "Checksum FAIL! Deleting artifact ($product $platform $version: $binary - checksum was $(cache::checksum::compute "$platform" "$binary"))"
       cache::delete "$platform" "$binary"
       exit 1
     }

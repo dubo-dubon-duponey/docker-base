@@ -51,7 +51,7 @@ target "downloader" {
   platforms = ["linux/amd64"]
   args = {
     APT_OPTIONS = "${APT_OPTIONS}"
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
   }
   output = [
     "${PWD}/context/builder",
@@ -66,10 +66,10 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:7f03244083da1df3bedb30b1dc7e0e32d72c128b33b6ff40167f1077414d753c"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
   }
   output = [
-    "${PWD}/context/builder/overlay",
+    "${PWD}/context/builder/cache/overlay",
   ]
 }
 
@@ -111,7 +111,7 @@ target "builder-node" {
 target "runtime" {
   inherits = ["shared", "base-shared"]
   dockerfile = "${PWD}/Dockerfile.runtime"
-  context = "${PWD}/context/builder/overlay"
+  context = "${PWD}/context/builder/cache/overlay"
   args = {
     BUILD_TITLE = "Dubo Runtime"
     BUILD_DESCRIPTION = "Base runtime image for all DBDBDP images"

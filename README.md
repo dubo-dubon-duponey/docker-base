@@ -2,41 +2,44 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6, with `DEBOOTSTRAP_DATE` in the form of `YYYY-MM-DD` (at the time of this writing `2020-07-01`):
+Currently, on linux amd64, arm64, arm/v7, arm/v6:
 
- * `dubodubonduponey/base:runtime-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * based on our debootstrapped version of Debian Buster (at `$DEBOOTSTRAP_DATE`, for suite `buster`)
+ * `dubodubonduponey/base:runtime` and `dubodubonduponey/base:runtime-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
+    * based on our debootstrapped version of Debian Buster (currently `DEBOOTSTRAP_DATE=2020-08-15`, for suite `buster`)
     * labels
     * ca-certificates copied over
     * ONBUILD instructions to copy over runtime folders
     * user creation
     * entrypoint definition
- * `dubodubonduponey/base:builder-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * based on our debootstrapped version of Debian Buster (at `$DEBOOTSTRAP_DATE`, for suite `buster`)
+ * `dubodubonduponey/base:builder` and `dubodubonduponey/base:builder-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
+    * based on our debootstrapped version of Debian Buster (currently `DEBOOTSTRAP_DATE=2020-08-15`, for suite `buster`)
     * golang, python, and essential dev & build tools
- * `dubodubonduponey/base:builder-node-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * nodejs + yarnpkg (except on arm/v6)
+ * `dubodubonduponey/base:builder-node` and `dubodubonduponey/base:builder-node-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
+    * +nodejs +yarnpkg
+    * no arm/v6
 
 ## How to build
 
 ```bash
 
-# Download golang, node, yarn
+# Download golang, node, yarn (once)
 ./build.sh downloader
 
 # Build and push the builders and runtime images
-VENDOR=you DEBOOTSTRAP_DATE=2020-07-01 ./build.sh --push
+VENDOR=you ./build.sh --push
 ```
 
 ## Advanced build parameters
 
 ```bash
-# if you want to use a caching proxy for apt requests (http only)
-APTPROXY=http://somewhere
+# Optional if you change apt behavior
+APT_OPTIONS="space separated arguments for apt -o"
+APT_SOURCES="replacement sources.list"
+APT_TRUSTED="base64 encoded content of a trusted.gpg file"
 
 # Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
-DEBOOTSTRAP_DATE=2020-07-01
-# Debian version you want (only buster is tested currently)
+DEBOOTSTRAP_DATE=2020-08-15
+# Debian version you want (only buster exist currently)
 DEBOOTSTRAP_SUITE=buster
 
 # destination for your final Debian image - defaults to Docker Hub if left unspecified

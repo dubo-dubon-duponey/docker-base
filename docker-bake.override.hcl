@@ -39,7 +39,7 @@ target "base-shared" {
 }
 
 group "default" {
-  targets = ["builder", "builder-node", "runtime"]
+  targets = ["overlay", "builder", "builder-node", "runtime"]
 }
 
 target "downloader" {
@@ -66,6 +66,7 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
+    APT_OPTIONS = "${APT_OPTIONS}"
     BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
   }
   output = [
@@ -73,12 +74,12 @@ target "overlay" {
   ]
 }
 
-
 target "builder" {
   inherits = ["shared", "base-shared"]
   dockerfile = "${PWD}/Dockerfile.builder"
   context = "${PWD}/context/builder"
   args = {
+    APT_OPTIONS = "${APT_OPTIONS}"
     BUILD_TITLE = "Dubo Builder"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images"
   }
@@ -93,6 +94,7 @@ target "builder-node" {
   dockerfile = "${PWD}/Dockerfile.builder"
   context = "${PWD}/context/builder"
   args = {
+    APT_OPTIONS = "${APT_OPTIONS}"
     BUILD_TITLE = "Dubo Builder with Node"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images (with Node)"
   }

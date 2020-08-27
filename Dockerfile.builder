@@ -152,7 +152,7 @@ ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy
 
 ENV           NODE_VERSION 10.22.0
-ENV           YARN_VERSION 1.22.4
+ENV           YARN_VERSION 1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt

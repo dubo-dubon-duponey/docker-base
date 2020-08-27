@@ -14,11 +14,6 @@ variable "DEBOOTSTRAP_SUITE" {
   default = "buster"
 }
 
-variable "APT_OPTIONS" {
-  # Downloader likely uses old-ish images, which is not a problem
-  default = "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
-}
-
 variable "PWD" {
   default = "."
 }
@@ -50,7 +45,6 @@ target "downloader" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    APT_OPTIONS = "${APT_OPTIONS}"
     BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
   }
   output = [
@@ -66,7 +60,6 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    APT_OPTIONS = "${APT_OPTIONS}"
     BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
   }
   output = [
@@ -79,7 +72,6 @@ target "builder" {
   dockerfile = "${PWD}/Dockerfile.builder"
   context = "${PWD}/context/builder"
   args = {
-    APT_OPTIONS = "${APT_OPTIONS}"
     BUILD_TITLE = "Dubo Builder"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images"
   }
@@ -94,7 +86,6 @@ target "builder-node" {
   dockerfile = "${PWD}/Dockerfile.builder"
   context = "${PWD}/context/builder"
   args = {
-    APT_OPTIONS = "${APT_OPTIONS}"
     BUILD_TITLE = "Dubo Builder with Node"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images (with Node)"
   }

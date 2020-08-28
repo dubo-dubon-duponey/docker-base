@@ -98,11 +98,14 @@ target "builder-node" {
     BUILD_TITLE = "Dubo Builder with Node"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images (with Node)"
   }
-  # No v6 for node
+  # No 386 for node
   platforms = [
     "linux/amd64",
     "linux/arm64",
     "linux/arm/v7",
+    "linux/arm/v6",
+    "linux/s390x",
+    "linux/ppc64el",
   ]
   tags = [
     "${REGISTRY}/${VENDOR}/base:builder-node-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",

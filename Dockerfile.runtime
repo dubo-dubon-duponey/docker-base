@@ -1,4 +1,4 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab
+ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6
 #######################
 # Runtime base
 # Base image for all runtime environments.

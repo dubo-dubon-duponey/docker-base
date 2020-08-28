@@ -31,6 +31,15 @@ target "base-shared" {
     BUILDER_BASE = "${equal(BUILDER_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${BUILDER_BASE}"}"
     RUNTIME_BASE = "${equal(RUNTIME_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${RUNTIME_BASE}"}"
   }
+  platforms = [
+    "linux/amd64",
+    "linux/arm64",
+    "linux/arm/v7",
+    "linux/arm/v6",
+    "linux/386",
+    "linux/s390x",
+    "linux/ppc64el",
+  ]
 }
 
 group "default" {
@@ -45,7 +54,7 @@ target "downloader" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6"
   }
   output = [
     "${PWD}/context/builder",
@@ -60,7 +69,7 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6"
   }
   output = [
     "${PWD}/context/builder/cache/overlay",

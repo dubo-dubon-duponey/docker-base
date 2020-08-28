@@ -18,7 +18,7 @@ if [ ! "$TEST_DOES_NOT_BUILD" ]; then
   mkdir -p context/builder/cache
   ./build.sh --progress plain downloader
   ./build.sh --progress plain overlay
-  ./build.sh --progress plain builder
-  ./build.sh --progress plain builder-node
-  ./build.sh --progress plain runtime
+  ./build.sh --progress plain --set builder.platform=linux/arm64 builder
+  ./build.sh --progress plain --set builder.platform=linux/arm64 builder-node
+  ./build.sh --progress plain --set builder.platform=linux/arm64 runtime
 fi

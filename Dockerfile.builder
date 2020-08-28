@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:e4347b6edff261b1f21e8448a25374e502375e4bf5c8d8ae11fb7c3c005044ab
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6
 
 #######################
 # "Builder"
@@ -52,9 +52,7 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-ENV           GOLANG_VERSION 1.14.7
-ENV           GOLANG_VERSION_CURRENT 1.14.7
-ENV           GOLANG_VERSION_NEXT 1.15.0
+ENV           GOLANG_VERSION 1.15.0
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -115,10 +113,7 @@ RUN           apt-get update -qq && \
 # The usefulness/security angle of this should be assessed.
 ADD           ./cache/overlay/overlay.tar /
 
-ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION_CURRENT.tar.gz /build/golang_current
-ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION_NEXT.tar.gz /build/golang_next
-
-RUN           ln -s /build/golang_current /build/golang
+ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
 
 WORKDIR       $GOPATH
 

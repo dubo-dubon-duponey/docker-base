@@ -19,7 +19,7 @@ init::golang(){
 }
 
 platforms::golang() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64el linux/s390x"
 }
 
 checksum::golang() {
@@ -55,6 +55,15 @@ url::golang() {
   "linux/arm/v6")
     arch="linux-armv6l"
     ;;
+  "linux/386")
+    arch="linux-386"
+    ;;
+  "linux/ppc64el")
+    arch="linux-ppc64le"
+    ;;
+  "linux/s390x")
+    arch="linux-s390x"
+    ;;
   esac
   printf "https://dl.google.com/go/go%s.%s.tar.gz" "$version" "$arch"
 }
@@ -82,7 +91,7 @@ init::node() {
 }
 
 platforms::node() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64el linux/s390x"
 }
 
 url::node() {
@@ -102,6 +111,18 @@ url::node() {
     ;;
   "linux/arm/v7")
     arch="linux-armv7l"
+    ;;
+  "linux/arm/v6")
+    arch="linux-armv6l"
+    ;;
+  "linux/386")
+    arch="linux-386"
+    ;;
+  "linux/ppc64el")
+    arch="linux-ppc64le"
+    ;;
+  "linux/s390x")
+    arch="linux-s390x"
     ;;
   esac
   printf "https://nodejs.org/dist/v%s/node-v%s-%s.tar.gz" "$version" "$version" "$arch"
@@ -129,6 +150,18 @@ checksum::node() {
   "linux/arm/v7")
     narch="linux-armv7l"
     ;;
+  "linux/arm/v6")
+    arch="linux-armv6l"
+    ;;
+  "linux/386")
+    arch="linux-386"
+    ;;
+  "linux/ppc64el")
+    arch="linux-ppc64le"
+    ;;
+  "linux/s390x")
+    arch="linux-s390x"
+    ;;
   esac
 
   checksum="$(grep " node-v$version-$narch.tar.gz\$" "$(cache::path "$arch" "node-$version.txt")")"
@@ -147,7 +180,7 @@ init::yarn() {
 }
 
 platforms::yarn() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64el linux/s390x"
 }
 
 url::yarn() {

@@ -54,7 +54,7 @@ target "downloader" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:6afd5f2d61c05210227a06521442567937334b3f5b1e7546abd588000a62fd44"
   }
   output = [
     "${PWD}/context/builder",
@@ -69,7 +69,7 @@ target "overlay" {
   tags = []
   platforms = ["linux/amd64"]
   args = {
-    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:60b453989a1ce94d29dd770a812598fe3e2889152cd4501eabbf4b20530806f6"
+    BUILDER_BASE = "${REGISTRY}/dubodubonduponey/debian@sha256:6afd5f2d61c05210227a06521442567937334b3f5b1e7546abd588000a62fd44"
   }
   output = [
     "${PWD}/context/builder/cache/overlay",

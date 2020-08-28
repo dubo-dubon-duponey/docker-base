@@ -91,7 +91,7 @@ init::node() {
 }
 
 platforms::node() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64el linux/s390x"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/ppc64el linux/s390x"
 }
 
 url::node() {
@@ -114,9 +114,6 @@ url::node() {
     ;;
   "linux/arm/v6")
     arch="linux-armv6l"
-    ;;
-  "linux/386")
-    arch="linux-386"
     ;;
   "linux/ppc64el")
     arch="linux-ppc64le"
@@ -151,16 +148,13 @@ checksum::node() {
     narch="linux-armv7l"
     ;;
   "linux/arm/v6")
-    arch="linux-armv6l"
-    ;;
-  "linux/386")
-    arch="linux-386"
+    narch="linux-armv6l"
     ;;
   "linux/ppc64el")
-    arch="linux-ppc64le"
+    narch="linux-ppc64le"
     ;;
   "linux/s390x")
-    arch="linux-s390x"
+    narch="linux-s390x"
     ;;
   esac
 
@@ -180,7 +174,7 @@ init::yarn() {
 }
 
 platforms::yarn() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64el linux/s390x"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/ppc64el linux/s390x"
 }
 
 url::yarn() {

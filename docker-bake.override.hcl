@@ -38,7 +38,7 @@ target "base-shared" {
     "linux/arm/v6",
     "linux/386",
     "linux/s390x",
-    "linux/ppc64el",
+    "linux/ppc64le",
   ]
 }
 
@@ -105,7 +105,7 @@ target "builder-node" {
     "linux/arm/v7",
     "linux/arm/v6",
     "linux/s390x",
-    "linux/ppc64el",
+    "linux/ppc64le",
   ]
   tags = [
     "${REGISTRY}/${VENDOR}/base:builder-node-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",

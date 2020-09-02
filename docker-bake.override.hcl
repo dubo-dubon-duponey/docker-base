@@ -31,15 +31,6 @@ target "base-shared" {
     BUILDER_BASE = "${equal(BUILDER_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${BUILDER_BASE}"}"
     RUNTIME_BASE = "${equal(RUNTIME_BASE,"") ? "${REGISTRY}/dubodubonduponey/debian:${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}" : "${RUNTIME_BASE}"}"
   }
-  platforms = [
-    "linux/amd64",
-    "linux/arm64",
-    "linux/arm/v7",
-    "linux/arm/v6",
-    "linux/386",
-    "linux/s390x",
-    "linux/ppc64le",
-  ]
 }
 
 group "default" {
@@ -98,15 +89,6 @@ target "builder-node" {
     BUILD_TITLE = "Dubo Builder with Node"
     BUILD_DESCRIPTION = "Base builder image for all DBDBDP images (with Node)"
   }
-  # No 386 for node
-  platforms = [
-    "linux/amd64",
-    "linux/arm64",
-    "linux/arm/v7",
-    "linux/arm/v6",
-    "linux/s390x",
-    "linux/ppc64le",
-  ]
   tags = [
     "${REGISTRY}/${VENDOR}/base:builder-node-${DEBOOTSTRAP_SUITE}-${DEBOOTSTRAP_DATE}",
   ]

@@ -2,7 +2,7 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, arm/v6, s390x, ppc64le, 386:
+Currently, on linux amd64, arm64, arm/v7, s390x, ppc64le:
 
  * `dubodubonduponey/base:runtime` and `dubodubonduponey/base:runtime-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
     * based on our debootstrapped version of Debian Buster (currently `DEBOOTSTRAP_DATE=2020-08-15`, for suite `buster`)
@@ -16,7 +16,6 @@ Currently, on linux amd64, arm64, arm/v7, arm/v6, s390x, ppc64le, 386:
     * golang, python, and essential dev & build tools
  * `dubodubonduponey/base:builder-node` and `dubodubonduponey/base:builder-node-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
     * +nodejs +yarnpkg
-    * no arm/v6
 
 ## How to build
 

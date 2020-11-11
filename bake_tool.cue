@@ -29,7 +29,7 @@ command: {
       APT_SOURCES: string | * ""
       APT_TRUSTED: string | * ""
 
-      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54"
+      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
   }
 
@@ -49,7 +49,7 @@ command: {
       APT_SOURCES: string | * ""
       APT_TRUSTED: string | * ""
 
-      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54"
+      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
     //  string | * "default as in cue" | string @tag(TESTIT,type=string)
   }
@@ -79,7 +79,7 @@ command: {
       APT_SOURCES: string | * ""
       APT_TRUSTED: string | * ""
 
-      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54"
+      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
     platforms: [
@@ -118,7 +118,7 @@ command: {
       APT_SOURCES: string | * ""
       APT_TRUSTED: string | * ""
 
-      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54"
+      BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
     platforms: [
@@ -143,7 +143,7 @@ command: {
       APT_SOURCES: string | * ""
       APT_TRUSTED: string | * ""
 
-      RUNTIME_BASE: string | * "dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54"
+      RUNTIME_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
     platforms: [

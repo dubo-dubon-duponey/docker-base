@@ -1,4 +1,4 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:05ff8e388e27caddcc2eb07056aaec33af736ba8639939081feeace936df4d54
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
 
 #######################
 # "Builder"
@@ -52,7 +52,7 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-ENV           GOLANG_VERSION 1.15.2
+ENV           GOLANG_VERSION 1.15.4
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -176,7 +176,7 @@ ONBUILD ARG   APT_TRUSTED
 ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy
 
-ENV           NODE_VERSION 10.22.1
+ENV           NODE_VERSION 10.23.0
 ENV           YARN_VERSION 1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt

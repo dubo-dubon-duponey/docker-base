@@ -34,7 +34,7 @@ VENDOR=you ./build.sh --push
 # Optional if you change apt behavior
 APT_OPTIONS="space separated arguments for apt -o"
 APT_SOURCES="replacement sources.list"
-APT_TRUSTED="base64 encoded content of a trusted.gpg file"
+APT_GPG_KEYRING="base64 encoded content of a trusted.gpg file"
 
 # Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
 DEBOOTSTRAP_DATE=2020-08-15

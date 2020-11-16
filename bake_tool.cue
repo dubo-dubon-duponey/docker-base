@@ -27,7 +27,9 @@ command: {
       https_proxy: string | * ""
       APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
-      APT_TRUSTED: string | * ""
+      APT_GPG_KEYRING: string | * ""
+      APT_NETRC: string | * ""
+      APT_TLS_CA: string | * ""
 
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
@@ -47,7 +49,9 @@ command: {
       https_proxy: string | * ""
       APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
-      APT_TRUSTED: string | * ""
+      APT_GPG_KEYRING: string | * ""
+      APT_NETRC: string | * ""
+      APT_TLS_CA: string | * ""
 
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
@@ -77,7 +81,9 @@ command: {
       https_proxy: string | * ""
       APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
-      APT_TRUSTED: string | * ""
+      APT_GPG_KEYRING: string | * ""
+      APT_NETRC: string | * ""
+      APT_TLS_CA: string | * ""
 
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
@@ -116,7 +122,9 @@ command: {
       https_proxy: string | * ""
       APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
-      APT_TRUSTED: string | * ""
+      APT_GPG_KEYRING: string | * ""
+      APT_NETRC: string | * ""
+      APT_TLS_CA: string | * ""
 
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
@@ -141,7 +149,9 @@ command: {
       https_proxy: string | * ""
       APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
-      APT_TRUSTED: string | * ""
+      APT_GPG_KEYRING: string | * ""
+      APT_NETRC: string | * ""
+      APT_TLS_CA: string | * ""
 
       RUNTIME_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }

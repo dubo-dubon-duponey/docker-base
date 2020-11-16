@@ -52,7 +52,7 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-ENV           GOLANG_VERSION 1.15.4
+ENV           GOLANG_VERSION 1.15.5
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -101,7 +101,9 @@ ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 # Apt behavior
 ONBUILD ARG   APT_OPTIONS
 ONBUILD ARG   APT_SOURCES
-ONBUILD ARG   APT_TRUSTED
+ONBUILD ARG   APT_GPG_KEYRING
+ONBUILD ARG   APT_NETRC
+ONBUILD ARG   APT_TLS_CA
 
 ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy
@@ -171,7 +173,9 @@ ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 # Apt behavior
 ONBUILD ARG   APT_OPTIONS
 ONBUILD ARG   APT_SOURCES
-ONBUILD ARG   APT_TRUSTED
+ONBUILD ARG   APT_GPG_KEYRING
+ONBUILD ARG   APT_NETRC
+ONBUILD ARG   APT_TLS_CA
 
 ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy

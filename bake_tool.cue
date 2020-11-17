@@ -58,6 +58,9 @@ command: {
     //  string | * "default as in cue" | string @tag(TESTIT,type=string)
   }
 
+  _default_platformset: AMD64 + "," + ARM64 + "," + V7 + "," + V6 + "," + PPC64LE + "," + S390X
+  _tag_platforms: string | * _default_platformset | string @tag(platforms,type=string)
+
   builder: #Bake & {
     target: "builder"
     context: "context/builder"
@@ -88,15 +91,7 @@ command: {
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
-    platforms: [
-      AMD64,
-      ARM64,
-      V6,
-      V7,
-      I386,
-      S390X,
-      PPC64LE,
-    ]
+    platforms: strings.Split(_tag_platforms, ",")
   }
 
   builder_node: #Bake & {
@@ -129,14 +124,7 @@ command: {
       BUILDER_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
-    platforms: [
-      AMD64,
-      ARM64,
-      V6,
-      V7,
-      S390X,
-      PPC64LE,
-    ]
+    platforms: strings.Split(_tag_platforms, ",")
   }
 
   runtime: #Bake & {
@@ -156,14 +144,6 @@ command: {
       RUNTIME_BASE: string | * "dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0"
     }
 
-    platforms: [
-      AMD64,
-      ARM64,
-      V6,
-      V7,
-      I386,
-      S390X,
-      PPC64LE,
-    ]
+    platforms: strings.Split(_tag_platforms, ",")
   }
 }

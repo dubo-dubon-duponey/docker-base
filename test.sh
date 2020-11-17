@@ -17,12 +17,12 @@ if [ ! "$TEST_DOES_NOT_BUILD" ]; then
   # XXX fix this please
   mkdir -p context/builder/cache
 
-  if ! ./hack/cue-bake downloader --inject progress=plain --inject platforms=linux/arm64; then
+  if ! ./hack/cue-bake downloader --inject progress=plain; then
     >&2 printf "Failed building downloader\n"
     exit 1
   fi
 
-  if ! ./hack/cue-bake overlay --inject progress=plain --inject platforms=linux/arm64; then
+  if ! ./hack/cue-bake overlay --inject progress=plain; then
     >&2 printf "Failed building overlay\n"
     exit 1
   fi

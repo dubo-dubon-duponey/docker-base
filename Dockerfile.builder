@@ -57,6 +57,40 @@ ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
+WORKDIR       $GOPATH
+# The usefulness/security angle of this should be assessed.
+ADD           ./cache/overlay/overlay.tar /
+ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
+
+###########################################################
+# C++ and generic
+# Generic development stuff
+# Python
+###########################################################
+# For CGO
+RUN           apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
+                g++=4:8.3.0-1 \
+                gcc=4:8.3.0-1 \
+                libc6-dev=2.28-10 \
+                make=4.2.1-1.2 \
+                dpkg-dev=1.19.7 \
+                autoconf=2.69-11 \
+                automake=1:1.16.1-4 \
+                libtool=2.4.6-9 \
+		            pkg-config=0.29-6 \
+                python=2.7.16-1 \
+                python3=3.7.3-1 \
+                virtualenv=15.1.0+ds-2 \
+                jq=1.5+dfsg-2+b1 \
+                curl=7.64.0-4+deb10u1 \
+                git=1:2.20.1-2+deb10u3 && \
+              apt-get -qq autoremove      && \
+              apt-get -qq clean           && \
+              rm -rf /var/lib/apt/lists/* && \
+              rm -rf /tmp/*               && \
+              rm -rf /var/tmp/*
+
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ARG           BUILD_URL="https://github.com/dubo-dubon-duponey/docker-base"
 ARG           BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/docker-base"
@@ -107,42 +141,6 @@ ONBUILD ARG   APT_TLS_CA
 
 ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy
-
-###########################################################
-# C++ and generic
-# Generic development stuff
-# Python
-###########################################################
-# For CGO
-RUN           apt-get update -qq && \
-              apt-get install -qq --no-install-recommends \
-                g++=4:8.3.0-1 \
-                gcc=4:8.3.0-1 \
-                libc6-dev=2.28-10 \
-                make=4.2.1-1.2 \
-                dpkg-dev=1.19.7 \
-                autoconf=2.69-11 \
-                automake=1:1.16.1-4 \
-                libtool=2.4.6-9 \
-		            pkg-config=0.29-6 \
-                python=2.7.16-1 \
-                python3=3.7.3-1 \
-                virtualenv=15.1.0+ds-2 \
-                jq=1.5+dfsg-2+b1 \
-                curl=7.64.0-4+deb10u1 \
-                git=1:2.20.1-2+deb10u3 && \
-              apt-get -qq autoremove      && \
-              apt-get -qq clean           && \
-              rm -rf /var/lib/apt/lists/* && \
-              rm -rf /tmp/*               && \
-              rm -rf /var/tmp/*
-
-# The usefulness/security angle of this should be assessed.
-ADD           ./cache/overlay/overlay.tar /
-
-ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
-
-WORKDIR       $GOPATH
 
 #######################
 # Actual "builder" image (with node)

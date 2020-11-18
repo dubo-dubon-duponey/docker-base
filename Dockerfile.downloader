@@ -1,10 +1,12 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:cb25298b653310dd8b7e52b743053415452708912fe0e8d3d0d4ccf6c4003746
+ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
+
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
 # hadolint ignore=DL3006
-FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS downloader-builder
-ARG           BUILDPLATFORM
+FROM          $BUILDER_BASE                                                                                             AS downloader-builder
+
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
@@ -12,29 +14,40 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-# hadolint ignore=DL3009
-RUN           apt-get update -qq && \
-              apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4 \
-                gnupg=2.2.12-1+deb10u1 \
-                dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20190110
+ENV           NODE_VERSION 10.23.0
+ENV           YARN_VERSION 1.22.5
 
-RUN           update-ca-certificates
-
-ENV           NODE_VERSION 10.21.0
-ENV           YARN_VERSION 1.22.2
-ENV           GOLANG_VERSION 1.13.13
-ENV           GOLANG_LINUX_AMD64_SHA512 b3bfe18e0b69eb2ce69c097c74bd267eb9685fca867d813ad92fd550042b84f7f1e41e58937125a83da0c214091a8a7700143104e5cc4033162a023c9d0e9038
-ENV           GOLANG_LINUX_ARM64_SHA512 9b9982027fdd2e259bb8df376a3d9156338a9958e2d4b0f44180167fcd89fe256631e860c09526c96d45e622fafcdff1e43b0de1a99af9846196aa49a41242ca
-ENV           GOLANG_LINUX_ARM_V7_SHA512 1404766eb547535618e456e3b228989ee04cdb487fcbdc498ede4d40e968baccfa8dc1f0038abf109bb82988893842d5b5ac02d9350653a32a487b0055a2c896
-ENV           GOLANG_LINUX_ARM_V6_SHA512 1404766eb547535618e456e3b228989ee04cdb487fcbdc498ede4d40e968baccfa8dc1f0038abf109bb82988893842d5b5ac02d9350653a32a487b0055a2c896
+ENV           GOLANG_VERSION 1.15.5
+ENV           GOLANG_LINUX_AMD64_SHA512 abff202e708a36b8a3d54ef23a86bdb6ac3660062a592dab1433c1abb3f89f139cb6bec8d4263e1d928f77ed116aa658b2e491efb089fc03cf8526c6c11ccfa2
+ENV           GOLANG_LINUX_ARM64_SHA512 733c13a9ea804b54eadd25698863ba05e22ffda26f67508a5ac446b2e7e93ab9f2790f1199f318e69827560318f4666848c476756c62609e783fded22d8c1b6b
+ENV           GOLANG_LINUX_ARM_V7_SHA512 c6df60ee90e9263083d1e5ab39bec88201dcc84646878c3f6416c66cdc1b9543722a7b8dc5985dc7df36564c3921b43c4ac7cef4d786ca0286497a352c85bf17
+ENV           GOLANG_LINUX_ARM_V6_SHA512 c6df60ee90e9263083d1e5ab39bec88201dcc84646878c3f6416c66cdc1b9543722a7b8dc5985dc7df36564c3921b43c4ac7cef4d786ca0286497a352c85bf17
+ENV           GOLANG_LINUX_386_SHA512 16f548f74a9a775e4dcc99056992feb758cd2b201ba7846f9118a462526aad0089eb2ffbb5a3d1735bd6d28de945202202c28aba1c946f03022af92146f83a79
+ENV           GOLANG_LINUX_S390X_SHA512 133816e18ecc9b4f7d0e7bc4c7108a6425e469b70b0d0625bd41ac2f6adee1f5d92ed29238a1af5d981c0e7958411754cea65409b6e46c43f36488f345896f80
+ENV           GOLANG_LINUX_PPC64LE_SHA512 3679a0683c6dcaba4e5c0e08f3dd07a2e25f3dbce579bf602139f20dfba4332ec3652d1e42fce5194bb99acf29a47dd5ac7659e6d4bf3e863fa5703360f2cf2e
 
 ENV           FAIL_WHEN_OUTDATED true
 
+# hadolint ignore=DL3009
+RUN           set -eu; \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
+                curl=7.64.0-4+deb10u1 \
+                gnupg=2.2.12-1+deb10u1 \
+                dirmngr=2.2.12-1+deb10u1 \
+                ca-certificates=20200601~deb10u1
+
+RUN           update-ca-certificates
+
 COPY          ./scripts /scripts
+
+COPY          ./cache /cache
 
 RUN           /scripts/entrypoint.sh
 
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /cache -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
 FROM          scratch                                                                                                   AS downloader
+
 COPY          --from=downloader-builder /cache /cache

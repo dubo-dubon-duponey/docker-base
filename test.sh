@@ -14,8 +14,31 @@ if ! shellcheck ./*.sh*; then
 fi
 
 if [ ! "$TEST_DOES_NOT_BUILD" ]; then
-  ./build.sh --progress plain downloader
-  ./build.sh --progress plain builder
-  ./build.sh --progress plain builder-node
-  ./build.sh --progress plain runtime
+  # XXX fix this please
+  mkdir -p context/builder/cache
+
+  if ! ./hack/cue-bake downloader --inject progress=plain; then
+    >&2 printf "Failed building downloader\n"
+    exit 1
+  fi
+
+  if ! ./hack/cue-bake overlay --inject progress=plain; then
+    >&2 printf "Failed building overlay\n"
+    exit 1
+  fi
+
+  if ! ./hack/cue-bake builder --inject progress=plain --inject platforms=linux/arm64; then
+    >&2 printf "Failed building builder\n"
+    exit 1
+  fi
+
+  if ! ./hack/cue-bake builder_node --inject progress=plain --inject platforms=linux/arm64; then
+    >&2 printf "Failed building builder_node\n"
+    exit 1
+  fi
+
+  if ! ./hack/cue-bake runtime --inject progress=plain --inject platforms=linux/arm64; then
+    >&2 printf "Failed building runtime\n"
+    exit 1
+  fi
 fi

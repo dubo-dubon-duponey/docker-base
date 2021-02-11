@@ -25,7 +25,7 @@ command: {
     args: os.Getenv & {
       http_proxy: string | * ""
       https_proxy: string | * ""
-      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
       APT_GPG_KEYRING: string | * ""
       APT_NETRC: string | * ""
@@ -47,7 +47,7 @@ command: {
     args: os.Getenv & {
       http_proxy: string | * ""
       https_proxy: string | * ""
-      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
       APT_GPG_KEYRING: string | * ""
       APT_NETRC: string | * ""
@@ -82,7 +82,7 @@ command: {
 
       http_proxy: string | * ""
       https_proxy: string | * ""
-      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
       APT_GPG_KEYRING: string | * ""
       APT_NETRC: string | * ""
@@ -115,7 +115,7 @@ command: {
 
       http_proxy: string | * ""
       https_proxy: string | * ""
-      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
       APT_GPG_KEYRING: string | * ""
       APT_NETRC: string | * ""
@@ -135,7 +135,7 @@ command: {
     args: os.Getenv & {
       http_proxy: string | * ""
       https_proxy: string | * ""
-      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+      APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
       APT_SOURCES: string | * ""
       APT_GPG_KEYRING: string | * ""
       APT_NETRC: string | * ""

@@ -52,7 +52,7 @@ ENV           LANG="C.UTF-8"
 ENV           LC_ALL="C.UTF-8"
 ENV           TZ="America/Los_Angeles"
 
-ENV           GOLANG_VERSION 1.15.5
+ENV           GOLANG_VERSION=1.15.6
 ENV           GOPATH=/build/golang/source
 ENV           GOROOT=/build/golang/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -178,8 +178,8 @@ ONBUILD ARG   APT_TLS_CA
 ONBUILD ARG   http_proxy
 ONBUILD ARG   https_proxy
 
-ENV           NODE_VERSION 10.23.0
-ENV           YARN_VERSION 1.22.5
+ENV           NODE_VERSION=10.23.0
+ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt

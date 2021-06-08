@@ -1,41 +1,48 @@
-ARG           BUILDER_BASE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
-
+ARG           FROM_IMAGE=dubodubonduponey/debian@sha256:4e19a1cecb37e70bc59ca2f735ac9e1d179b073100d8b397a30930532fd407db
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
 # hadolint ignore=DL3006
-FROM          $BUILDER_BASE                                                                                             AS downloader-builder
+FROM          $FROM_IMAGE                                                                                       AS downloader-builder
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ARG           DEBIAN_FRONTEND="noninteractive"
-ENV           TERM="xterm"
-ENV           LANG="C.UTF-8"
-ENV           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
-
-ENV           NODE_VERSION=10.23.0
+#ENV           NODE_VERSION=10.24.1
+ENV           NODE_VERSION=14.17.0
+#ENV           NODE_VERSION=16.3.0
 ENV           YARN_VERSION=1.22.5
 
-ENV           GOLANG_VERSION=1.15.6
-ENV           GOLANG_LINUX_AMD64_SHA512=007487ca71c1b7874a5e9d0e2125c3b05b98321ff6997547ab4105d3b2d0fad04a1ffaeac94549a2605972bc3c2bbbfc8fb9b428f3732f98ccbe3b388dbb258d
-ENV           GOLANG_LINUX_ARM64_SHA512=2d2b14d880c929ff8e1438f738e7cb0be091f76b388e23e7742d677f1d20a47ce6ffdfac0437529c9f8cf896e79c2f35c5b174c31e7456beea76d8fb6cd0e901
-ENV           GOLANG_LINUX_ARM_V7_SHA512=f0a411079c68d4213cc644e9099cae07fcd517d99da8acc95cfb57cbedaa68203a0e8f5072133dbb7c78f5b16e16ddfcffafb068d198c60c5d25385ea5efa619
-ENV           GOLANG_LINUX_ARM_V6_SHA512=f0a411079c68d4213cc644e9099cae07fcd517d99da8acc95cfb57cbedaa68203a0e8f5072133dbb7c78f5b16e16ddfcffafb068d198c60c5d25385ea5efa619
-ENV           GOLANG_LINUX_386_SHA512=9d4c1338b33db79add484abf2f3bff6ab4bbc9b0dde9355f0468a4d7b9a9d7c7f735e191de19b0974444c8d3ed58568ec4a763c3834e4da66cd5eb5b8fea3159
-ENV           GOLANG_LINUX_S390X_SHA512=55b66124bf1345197b41d0a772163916bcfeab7f1a04f70d65d80ad1825147f840f79e515e99a4c4c2e574bcb25c06cb7500c85dfe8570545810b856725cefe3
-ENV           GOLANG_LINUX_PPC64LE_SHA512=bf365a45ea16930ae18919d17aa7152607c851ed04130bde3b4987681efe9f1cf2ebc1b111f55ff689024df37891dfb7e3299f724f653a576047af861cf9bf7d
+# 1.16.4
+ENV           GOLANG_VERSION 1.15.13
+ENV           GOLANG_LINUX_AMD64_SHA512 866aa22f9ecdba3c250f206d71ced5857aee67bf8da470b68447c11488dc80e243e985c9baeedf56476ddc113320bf0ed5efe8453bd3da071c4aa3abb58e142d
+ENV           GOLANG_LINUX_ARM64_SHA512 362499cd4640bd7a9a7358afbcdd89783c0af5ac2a2209a37e8f15dc2e1392fa1d4704ec33cdf28fa00c09a13b36568e639634b8fa89b958ee7fa9237f1f3e93
+ENV           GOLANG_LINUX_ARM_V7_SHA512 26eff19aeef922554f6582767488182bf16e3278e0c124f6d0c6524db441465b6c1432976c4c6e88b84a2aab385280e1dd374428c2ac0070806593e108f2ad54
+ENV           GOLANG_LINUX_ARM_V6_SHA512 26eff19aeef922554f6582767488182bf16e3278e0c124f6d0c6524db441465b6c1432976c4c6e88b84a2aab385280e1dd374428c2ac0070806593e108f2ad54
+ENV           GOLANG_LINUX_386_SHA512 6c92732fb2ce75b084cb925e9813d45d626cae8193a1fa4a8f057e65bef1ff6bb64ac68d417dedae51ebae1182b54fb9365ac82dcc42751b2fc697aad015625a
+ENV           GOLANG_LINUX_S390X_SHA512 0739486667d6a9ea9514dce309afb28a38505ae49337fc3223dcff038685858afbe1f507b6d4d4b89872874e01d01ceac7f0f814f439fbdf4734a212188ee4c9
+ENV           GOLANG_LINUX_PPC64LE_SHA512 c8a7de65d4f633ee7c058070c6ebd01c3ebcfc9119e2371d18bb775b72b1961c705579df59c69c781eba29b0bbec901080c296ea568a12b610f70c65e2109cf4
 
 ENV           FAIL_WHEN_OUTDATED=true
 
+# Symlink deviation is necessary as ca-certificates will overwrite the crt file
 # hadolint ignore=DL3009
-RUN           set -eu; \
-              apt-get update -qq && \
+RUN           --mount=type=secret,mode=0444,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=PASSPHRASE \
+              --mount=type=secret,mode=0444,id=GPG \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
+              set -eu; \
+              ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
+              apt-get update -qq; \
+              apt-cache show curl gnupg dirmngr ca-certificates; \
               apt-get install -qq --no-install-recommends \
-                curl=7.64.0-4+deb10u1 \
-                gnupg=2.2.12-1+deb10u1 \
-                dirmngr=2.2.12-1+deb10u1 \
-                ca-certificates=20200601~deb10u1
+                curl=7.74.0-1.2 \
+                gnupg=2.2.27-2 \
+                dirmngr=2.2.27-2 \
+                ca-certificates=20210119
 
 RUN           update-ca-certificates
 
@@ -43,7 +50,15 @@ COPY          ./scripts /scripts
 
 COPY          ./cache /cache
 
-RUN           /scripts/entrypoint.sh
+RUN           --mount=type=secret,mode=0444,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=PASSPHRASE \
+              --mount=type=secret,mode=0444,id=GPG \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=CURL_OPTIONS,dst=/root/.curlrc \
+              set -eu; \
+              /scripts/entrypoint.sh
 
 RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /cache -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +

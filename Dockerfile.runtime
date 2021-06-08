@@ -1,4 +1,4 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
+ARG           FROM_IMAGE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
 #######################
 # Runtime base
 # Base image for all runtime environments.
@@ -10,7 +10,7 @@ ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6
 # - automatic entrypoint definition and user setting
 #######################
 # hadolint ignore=DL3006
-FROM          $RUNTIME_BASE                                                                                             AS runtime
+FROM          $FROM_IMAGE                                                                                               AS runtime
 
 ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
@@ -23,16 +23,6 @@ ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 
 # Base
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
-
-# Apt behavior
-ONBUILD ARG   APT_OPTIONS
-ONBUILD ARG   APT_SOURCES
-ONBUILD ARG   APT_GPG_KEYRING
-ONBUILD ARG   APT_NETRC
-ONBUILD ARG   APT_TLS_CA
-
-ONBUILD ARG   http_proxy
-ONBUILD ARG   https_proxy
 
 # Build args
 ONBUILD ARG   BUILD_UID=2000

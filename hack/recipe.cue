@@ -23,21 +23,21 @@ defaults: {
 		types.#Image & {
 			registry: "push-registry.local"
  			image: "dubo-dubon-duponey/base"
-			tag: cakes.debian.recipe.process.args.TARGET_SUITE + "-" + cakes.debian.recipe.process.args.TARGET_DATE
+			// tag: cakes.debian.recipe.process.args.TARGET_SUITE + "-" + cakes.debian.recipe.process.args.TARGET_DATE
 		},
 		types.#Image & {
 			registry: "push-registry.local"
-			image: "dubo-dubon-duponey/debian"
+			image: "dubo-dubon-duponey/base"
 			tag: "latest"
 		},
 		types.#Image & {
    		registry: "ghcr.io"
-   		image: "dubo-dubon-duponey/debian"
-   		tag: cakes.debian.recipe.process.args.TARGET_SUITE + "-" + cakes.debian.recipe.process.args.TARGET_DATE
+   		image: "dubo-dubon-duponey/base"
+   		// tag: cakes.debian.recipe.process.args.TARGET_SUITE + "-" + cakes.debian.recipe.process.args.TARGET_DATE
    	},
 		types.#Image & {
 			registry: "ghcr.io"
-			image: "dubo-dubon-duponey/debian"
+			image: "dubo-dubon-duponey/base"
 			tag: "latest"
 		}
 	],
@@ -177,7 +177,7 @@ cakes: {
 		icing: UserDefined
   }
 
-  builder_node: scullery.#Cake & {
+  node: scullery.#Cake & {
 		recipe: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {

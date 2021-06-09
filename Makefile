@@ -58,6 +58,16 @@ builder:
 		builder $(DC_MAKEFILE_DIR)/hack/recipe.cue $(DC_MAKEFILE_DIR)/hack/cue_tool.cue ${ICING}
 	$(call footer, $@)
 
+node:
+	$(call title, $@)
+	$(shell command -v cue > /dev/null || { echo "You need cue installed"; exit 1; })
+	cue --inject from_image=$(FROM_IMAGE) \
+		${EXTRAS} \
+		--inject platforms=$(TARGET_PLATFORM) \
+		--inject tags=${TARGET_TAGS} \
+		node $(DC_MAKEFILE_DIR)/hack/recipe.cue $(DC_MAKEFILE_DIR)/hack/cue_tool.cue ${ICING}
+	$(call footer, $@)
+
 runtime:
 	$(call title, $@)
 	$(shell command -v cue > /dev/null || { echo "You need cue installed"; exit 1; })

@@ -98,6 +98,9 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               rm -rf /tmp/*               && \
               rm -rf /var/tmp/*
 
+RUN           set -eu; \
+              git config --global advice.detachedHead false
+
 # The usefulness/security angle of this should be assessed.
 ADD           ./cache/overlay/overlay.tar /
 
@@ -128,7 +131,14 @@ LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
 
 # Base
 ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   TARGETOS
+ONBUILD ARG   TARGETARCH
+ONBUILD ARG   TARGETVARIANT
+
 ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   BUILDOS
+ONBUILD ARG   BUILDARCH
+ONBUILD ARG   BUILDVARIANT
 
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 ONBUILD ARG   TERM="xterm"

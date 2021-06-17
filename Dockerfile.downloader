@@ -2,13 +2,12 @@ ARG           FROM_IMAGE=dubodubonduponey/debian@sha256:4e19a1cecb37e70bc59ca2f7
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
-# hadolint ignore=DL3006
 FROM          $FROM_IMAGE                                                                                       AS downloader-builder
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
 #ENV           NODE_VERSION=10.24.1
-ENV           NODE_VERSION=14.17.0
+ENV           NODE_VERSION=14.17.1
 #ENV           NODE_VERSION=16.3.0
 ENV           YARN_VERSION=1.22.5
 
@@ -34,7 +33,6 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              set -eu; \
               ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
               apt-get update -qq; \
               apt-cache show curl gnupg dirmngr ca-certificates; \
@@ -57,7 +55,6 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               --mount=type=secret,mode=0444,id=GPG \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=CURL_OPTIONS,dst=/root/.curlrc \
-              set -eu; \
               /scripts/entrypoint.sh
 
 RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \

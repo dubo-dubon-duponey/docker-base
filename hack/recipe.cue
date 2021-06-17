@@ -101,7 +101,7 @@ cakes: {
 		recipe: {
 			input: {
 				root: "./"
-				context: "context/builder"
+				context: "./context"
 				from: injector._from_image
 		    dockerfile: "Dockerfile.downloader"
 			}
@@ -114,7 +114,7 @@ cakes: {
 				}
 			}
 			output: {
-				directory: "context/builder"
+				directory: "./context"
 			}
 		}
 
@@ -126,7 +126,7 @@ cakes: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {
 				root: "./"
-				context: "context/empty"
+				context: "./context"
 				from: injector._from_image
 				dockerfile: "Dockerfile.builder"
 			}
@@ -139,7 +139,7 @@ cakes: {
 				}
 			}
 			output: {
-		    directory: "context/builder/cache/overlay"
+		    directory: "context/cache"
 			}
 		}
 
@@ -151,7 +151,7 @@ cakes: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {
 				root: "./"
-				context: "context/builder"
+				context: "./context"
 				from: injector._from_image
 				dockerfile: "Dockerfile.builder"
 			}
@@ -182,7 +182,7 @@ cakes: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {
 				root: "./"
-				context: "context/builder"
+				context: "./context"
 				from: injector._from_image
 				dockerfile: "Dockerfile.builder"
 			}
@@ -210,7 +210,7 @@ cakes: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {
 				root: "./"
-				context: "context/builder/cache/overlay"
+				context: "./context"
 				from: injector._from_image
 				dockerfile: "Dockerfile.runtime"
 			}

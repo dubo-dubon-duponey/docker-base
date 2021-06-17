@@ -6,7 +6,6 @@ ARG           FROM_IMAGE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4
 # - updated ca root
 # XXX IIRC we have to do this gymnastic on the NATIVE platform because qemu will fail silently installing ca-certs
 #######################
-# hadolint ignore=DL3006
 FROM          $FROM_IMAGE                                                                                               AS overlay-builder
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
@@ -19,7 +18,6 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              set -eu; \
               ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
@@ -27,13 +25,11 @@ RUN           --mount=type=secret,mode=0444,id=CA \
 
 RUN           update-ca-certificates
 
-RUN           set -eu; \
-              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
 
-RUN           set -eu; \
-              tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
+RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
 
 ########################################################################################################################
 # Export of the above
@@ -45,19 +41,16 @@ COPY          --from=overlay-builder /overlay.tar /overlay.tar
 #######################
 # Actual "builder" image
 #######################
-# hadolint ignore=DL3006
 FROM          $FROM_IMAGE                                                                                               AS builder
 
 ARG           TARGETPLATFORM
 ARG           BUILDPLATFORM
 
-ENV           GOLANG_VERSION=1.15.13
-ENV           GOPATH=/build/golang/source
-ENV           GOROOT=/build/golang/go
+ENV           GOPATH=/build/golang-current/source
+ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 WORKDIR       $GOPATH
-ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang
 
 ###########################################################
 # C++ and generic
@@ -73,7 +66,6 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              set -eu; \
               ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
@@ -98,11 +90,17 @@ RUN           --mount=type=secret,mode=0444,id=CA \
               rm -rf /tmp/*               && \
               rm -rf /var/tmp/*
 
-RUN           set -eu; \
-              git config --global advice.detachedHead false
+# Stop git from complaining about detached heads all the time
+RUN           git config --global advice.detachedHead false
 
 # The usefulness/security angle of this should be assessed.
-ADD           ./cache/overlay/overlay.tar /
+ADD           ./cache/overlay.tar /
+
+ENV           GOLANG_VERSION=1.15.13
+ENV           GOLANG_VERSION_PREVIOUS=1.15.13
+
+ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
+ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION_PREVIOUS.tar.gz /build/golang-previous
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ARG           BUILD_URL="https://github.com/dubo-dubon-duponey/docker-base"
@@ -160,7 +158,6 @@ ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 #######################
 # Actual "builder" image (with node)
 #######################
-# hadolint ignore=DL3006
 FROM          builder                                                                                                   AS builder-node
 
 ARG           BUILD_TITLE="A DBDBDP image"
@@ -188,7 +185,7 @@ ONBUILD ARG   CGO_ENABLED=0
 ONBUILD ARG   GO111MODULE=on
 ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 
-ENV           NODE_VERSION=14.17.0
+ENV           NODE_VERSION=14.17.1
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -197,8 +194,7 @@ ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
 ###########################################################
 # Node and Yarn install
 ###########################################################
-RUN           set -eu; \
-              ln -s /opt/node-*/bin/* /usr/local/bin/; \
+RUN           ln -s /opt/node-*/bin/* /usr/local/bin/; \
               ln -s /opt/yarn-*/bin/yarn /usr/local/bin/; \
               ln -s /opt/yarn-*/bin/yarnpkg /usr/local/bin/; \
               ln -s /usr/local/bin/node /usr/local/bin/nodejs

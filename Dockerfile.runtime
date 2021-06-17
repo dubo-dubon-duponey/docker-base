@@ -9,7 +9,6 @@ ARG           FROM_IMAGE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4
 # - anything useful from the builder-generic image
 # - automatic entrypoint definition and user setting
 #######################
-# hadolint ignore=DL3006
 FROM          $FROM_IMAGE                                                                                               AS runtime
 
 ARG           DEBIAN_FRONTEND="noninteractive"
@@ -82,8 +81,7 @@ ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
 # Setup directories and permissions
 # The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
 # Write is granted, although that doesn't really matter in term of security
-ONBUILD RUN   set -eu; \
-              [ "$BUILD_UID" -eq "2000" ] || { \
+ONBUILD RUN   [ "$BUILD_UID" -eq "2000" ] || { \
                 usermod -u "$BUILD_UID" dubo-dubon-duponey; \
                 chown -R $BUILD_UID:root /boot; \
                 chown -R $BUILD_UID:root /config; \

@@ -53,7 +53,7 @@ ONBUILD LABEL org.opencontainers.image.title="$BUILD_TITLE"
 ONBUILD LABEL org.opencontainers.image.description="$BUILD_DESCRIPTION"
 
 # The usefulness/security angle of this should be assessed.
-ADD           ./overlay.tar /
+ADD           ./cache/overlay.tar /
 
 # Create a restricted user account (no shell, no home, disabled), and add folders
 RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \

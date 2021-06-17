@@ -1,4 +1,4 @@
-ARG           FROM_IMAGE=docker.io/dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
+ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:d8b3b52f000b27ea86040b825305fd1fa2c81fe23270b4302b584dd408243a4c
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -148,7 +148,7 @@ ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ONBUILD ARG   BUILD_VERSION="unknown"
 ONBUILD ARG   BUILD_REVISION="unknown"
 
-# CGO disabled by default for cross-compilation to work
+# CGO disabled by default
 ONBUILD ARG   CGO_ENABLED=0
 
 # Modules are on by default

@@ -1,4 +1,4 @@
-ARG           FROM_IMAGE=dubodubonduponey/debian@sha256:4e19a1cecb37e70bc59ca2f735ac9e1d179b073100d8b397a30930532fd407db
+ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:d8b3b52f000b27ea86040b825305fd1fa2c81fe23270b4302b584dd408243a4c
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################

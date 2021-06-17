@@ -2,61 +2,47 @@
 
 Provides base images (builder and runtime) used by all our images.
 
-Currently, on linux amd64, arm64, arm/v7, s390x, ppc64le:
+Currently, on linux amd64, 386, arm64, arm/v7, arm/v6, s390x, ppc64le:
 
- * `dubodubonduponey/base:runtime` and `dubodubonduponey/base:runtime-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * based on our debootstrapped version of Debian Buster (currently `DEBOOTSTRAP_DATE=2020-08-15`, for suite `buster`)
-    * labels
-    * ca-certificates copied over
-    * ONBUILD instructions to copy over runtime folders
-    * user creation
-    * entrypoint definition
- * `dubodubonduponey/base:builder` and `dubodubonduponey/base:builder-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * based on our debootstrapped version of Debian Buster (currently `DEBOOTSTRAP_DATE=2020-08-15`, for suite `buster`)
-    * golang, python, and essential dev & build tools
- * `dubodubonduponey/base:builder-node` and `dubodubonduponey/base:builder-node-$DEBOOTSTRAP_SUITE-$DEBOOTSTRAP_DATE`
-    * +nodejs +yarnpkg
+* `dubodubonduponey/base:runtime-latest` and `dubodubonduponey/base:runtime-$SUITE-$DATE`
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-06-01`)
+  * labels
+  * ca-certificates copied over
+  * ONBUILD instructions to copy over runtime folders
+  * user creation
+  * entrypoint definition
+* `dubodubonduponey/base:builder-latest` and `dubodubonduponey/base:builder-$SUITE-$DATE`
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-06-01`)
+  * golang, python, and essential dev & build tools
+* `dubodubonduponey/base:node-latest` and `dubodubonduponey/base:node-$SUITE-$DATE`
+  * +nodejs +yarnpkg
 
-## How to build
+## TL;DR
 
 ```bash
 
 # Download golang, node, yarn (once)
-./build.sh downloader
+./hack/build.sh downloader
+
+# Build the overlay
+./hack/build.sh overlay
 
 # Build and push the builders and runtime images
-VENDOR=you ./build.sh --push
+./hack/build.sh builder --inject tags=registry.com/name/image:tag
+./hack/build.sh node --inject tags=registry.com/name/image:tag
+./hack/build.sh runtime --inject tags=registry.com/name/image:tag
 ```
 
-## Advanced build parameters
+## Configuration
 
-```bash
-# Optional if you change apt behavior
-APT_OPTIONS="space separated arguments for apt -o"
-APT_SOURCES="replacement sources.list"
-APT_GPG_KEYRING="base64 encoded content of a trusted.gpg file"
+You can control additional aspects of the build passing arguments:
 
-# Control which debian version to use (see available tags at docker.io/dubodubonduponey/debian)
-DEBOOTSTRAP_DATE=2020-08-15
-# Debian version you want (only buster exist currently)
-DEBOOTSTRAP_SUITE=buster
-
-# destination for your final Debian image - defaults to Docker Hub if left unspecified
-REGISTRY="docker.io"
-VENDOR="dubodubonduponey"
-
-# If you want to use an entirely different Debian base - caution: you may have to adjust packages versions inside the dockerfile as well as this might break!
-BUILDER_BASE="registry/foo/bar:tag"
-RUNTIME_BASE="..."
-
-# Additionally, any additional argument passed to build.sh is fed to docker buildx bake.
-# Specifically you may want to use any of
-#  --no-cache           Do not use cache when building the image
-#  --print              Print the options without building
-#  --progress string    Set type of progress output (auto, plain, tty). Use plain to show container output (default "auto")
-#  --set stringArray    Override target value (eg: targetpattern.key=value)
-
-# Specifically, you may want to override platform if you want to restrict building to a subset of supported platforms.
+```
+# Control base image, target platforms, and cache
+./hack/build.sh runtime \
+  --inject from_image="ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01" \
+  --inject platforms="linux/arm/v6" \
+  --inject cache_base=type=registry,ref=somewhere.com/cache/foo
 ```
 
 ## Notes
@@ -65,8 +51,8 @@ The downloader image will FAIL building if it detects a new patch release for go
 
 In that case, it will display updated versions (and sha) to copy over in the dockerfile.
 
-Alternatively, you can pass `FAIL_WHEN_OUTDATED=` as a build arg to build with outdated versions.
+Alternatively, you can pass `FAIL_WHEN_OUTDATED=` as a build arg to build with outdated versions (see the `recipe` file).
 
 ## Caveats
 
-This: https://github.com/moby/qemu/issues/9
+Qemu as usual is a problem - see specifically https://github.com/moby/qemu/issues/9

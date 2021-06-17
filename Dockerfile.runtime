@@ -11,6 +11,8 @@ ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@s
 #######################
 FROM          $FROM_IMAGE                                                                                               AS runtime
 
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
+
 ARG           DEBIAN_FRONTEND="noninteractive"
 ENV           TERM="xterm"
 ENV           LANG="C.UTF-8"

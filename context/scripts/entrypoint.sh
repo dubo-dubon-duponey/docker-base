@@ -18,6 +18,10 @@ init::golang(){
   logger::debug "Golang: nothing to init"
 }
 
+init::golang_old(){
+  logger::debug "Golang: nothing to init"
+}
+
 platforms::golang() {
   printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
 }
@@ -212,10 +216,11 @@ logger::debug "Checking node"
 check::node
 logger::debug "Checking golang"
 check::golang
+check::golang_old
 logger::debug "Checking yarn"
 check::yarn
 
-for product in node yarn golang; do
+for product in node yarn golang golang_old; do
   init::"$product"
 
   version="$(env::version::read "$product")"

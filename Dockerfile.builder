@@ -1,4 +1,4 @@
-ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:d8b3b52f000b27ea86040b825305fd1fa2c81fe23270b4302b584dd408243a4c
+ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:22779249c8878a001f1cf8acf4983501176f165536375839397719553a9d6311
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
@@ -96,7 +96,7 @@ RUN           git config --global advice.detachedHead false
 # The usefulness/security angle of this should be assessed.
 ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.15.13
+ENV           GOLANG_VERSION=1.16.5
 ENV           GOLANG_VERSION_PREVIOUS=1.15.13
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
@@ -158,16 +158,25 @@ ONBUILD ARG   GOPROXY="https://proxy.golang.org"
 #######################
 # Actual "builder" image (with node)
 #######################
-FROM          builder                                                                                                   AS builder-node
+FROM          $FROM_IMAGE                                                                                               AS builder-node
 
 ARG           BUILD_TITLE="A DBDBDP image"
 ARG           BUILD_DESCRIPTION="So image. Much DBDBDP. Such description."
 LABEL         org.opencontainers.image.title="$BUILD_TITLE"
 LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
 
+ARG           TARGETPLATFORM
+
 # Base
 ONBUILD ARG   TARGETPLATFORM
+ONBUILD ARG   TARGETOS
+ONBUILD ARG   TARGETARCH
+ONBUILD ARG   TARGETVARIANT
+
 ONBUILD ARG   BUILDPLATFORM
+ONBUILD ARG   BUILDOS
+ONBUILD ARG   BUILDARCH
+ONBUILD ARG   BUILDVARIANT
 
 ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
 ONBUILD ARG   TERM="xterm"
@@ -179,12 +188,7 @@ ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ONBUILD ARG   BUILD_VERSION="unknown"
 ONBUILD ARG   BUILD_REVISION="unknown"
 
-# CGO disabled by default for cross-compilation to work
-ONBUILD ARG   CGO_ENABLED=0
-# Modules are on by default
-ONBUILD ARG   GO111MODULE=on
-ONBUILD ARG   GOPROXY="https://proxy.golang.org"
-
+# Node stuff
 ENV           NODE_VERSION=14.17.1
 ENV           YARN_VERSION=1.22.5
 

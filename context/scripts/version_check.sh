@@ -55,6 +55,23 @@ check::golang() {
   fi
 }
 
+check::golang_old() {
+  local version
+
+  version="$(env::version::read "golang_old")"
+
+  if ! newversion=$(version::latest::patch url::golang "$version" "linux/amd64"); then
+    logger::error "There is a more recent patch for the version of golang you want. You must update:"
+
+    version::latest::checksum "golang_old" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7" "linux/arm/v6" "linux/386" "linux/s390x" "linux/ppc64le"
+
+    [ ! "$FAIL_WHEN_OUTDATED" ] || {
+      logger::error "We will stop now - if you really want to NOT update though and build with that, set the build argument 'FAIL_WHEN_OUTDATED='";
+      exit 1
+    }
+  fi
+}
+
 check::node() {
   local version
 

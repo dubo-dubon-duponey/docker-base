@@ -18,10 +18,6 @@ init::golang(){
   logger::debug "Golang: nothing to init"
 }
 
-init::golang_old(){
-  logger::debug "Golang: nothing to init"
-}
-
 platforms::golang() {
   printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
 }
@@ -255,7 +251,6 @@ entrypoint(){
       exit 1
     }
   done
-
 }
 
 entrypoint "$@"

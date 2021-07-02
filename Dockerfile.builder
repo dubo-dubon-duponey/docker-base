@@ -54,6 +54,10 @@ ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 # - cross-toolchains for all supported architectures
 # - basic dev stuff (git, jq, curl, devscripts)
 # - additional often used build tools (automake, autoconf, libtool and pkg-config)
+# Might not work on same platform as the cross build target...
+# XXX WARNING
+# Something weird is happening here: for some reason, installing everything in one call breaks apt which complains about "broken packages being held"
+# Also, transient qemu core dumps (even with qemu 6), so... here be effing dragons  
 RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,uid=100,id=CERTIFICATE \
               --mount=type=secret,uid=100,id=KEY \
@@ -76,9 +80,10 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 jq=1.6-2.1 \
                 curl=7.74.0-1.2 \
                 ca-certificates=20210119 \
-                git=1:2.30.2-1 \
-                devscripts=2.21.2 \
+                git=1:2.30.2-1; \
+              apt-get install -qq --no-install-recommends \
                 "${packages[@]}"; \
+              apt-get install -qq devscripts=2.21.2; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \

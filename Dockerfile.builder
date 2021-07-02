@@ -1,24 +1,23 @@
-ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:22779249c8878a001f1cf8acf4983501176f165536375839397719553a9d6311
+ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d162e34b3a53944cec3ba525b07ef6152ff391ed916de4ee4eb04debb019c8b0
 #######################
 # "Builder"
 # This image is meant to provide basic files copied over directly into the base target image.
 # Right now:
-# - updated ca root
-# XXX IIRC we have to do this gymnastic on the NATIVE platform because qemu will fail silently installing ca-certs
+# - ca-certificates: originally due to a bug in qemu / libc installing ca-certificates would fail 32bits systems, which prompted this deviation
+# The problem may (?) be fixed now in qemu6, although ca-certificates do install libssl and openssl, which is undesirable.
+# By installing out of band, on the native arch, and copying the files, we get to install trusted roots without the hassle of shipping openssl
 #######################
 FROM          $FROM_IMAGE                                                                                               AS overlay-builder
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-RUN           --mount=type=secret,mode=0444,id=CA \
-              --mount=type=secret,id=CERTIFICATE \
-              --mount=type=secret,id=KEY \
-              --mount=type=secret,id=PASSPHRASE \
-              --mount=type=secret,mode=0444,id=GPG.gpg \
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
-              --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
+              --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
                 ca-certificates=20210119
@@ -43,65 +42,61 @@ COPY          --from=overlay-builder /overlay.tar /overlay.tar
 #######################
 FROM          $FROM_IMAGE                                                                                               AS builder
 
+# This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
-ARG           BUILDPLATFORM
 
+# Add go to path, and point GOPATH and GOROOT to the right locations
 ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-WORKDIR       $GOPATH
-
-###########################################################
-# C++ and generic
-# Generic development stuff
-# Python
-###########################################################
-# For CGO
-RUN           --mount=type=secret,mode=0444,id=CA \
-              --mount=type=secret,id=CERTIFICATE \
-              --mount=type=secret,id=KEY \
-              --mount=type=secret,id=PASSPHRASE \
-              --mount=type=secret,mode=0444,id=GPG.gpg \
+# Install:
+# - cross-toolchains for all supported architectures
+# - basic dev stuff (git, jq, curl, devscripts)
+# - additional often used build tools (automake, autoconf, libtool and pkg-config)
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
-              --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
+              --mount=type=secret,id=APT_CONFIG \
+              packages=(); \
+              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                dpkg --add-architecture "$architecture"; \
+                packages+=(crossbuild-essential-"$architecture"=12.9); \
+              done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                g++=4:10.2.1-1 \
-                gcc=4:10.2.1-1 \
-                libc6-dev=2.31-12 \
-                make=4.3-4.1 \
-                dpkg-dev=1.20.9 \
+                build-essential=12.9 \
                 autoconf=2.69-14 \
                 automake=1:1.16.3-2 \
                 libtool=2.4.6-15 \
 		            pkg-config=0.29.2-1 \
-                python2=2.7.18-2 \
-                python3=3.9.2-3 \
-                virtualenv=20.4.0+ds-1 \
                 jq=1.6-2.1 \
                 curl=7.74.0-1.2 \
-                git=1:2.30.2-1; \
-              apt-get -qq autoremove      && \
-              apt-get -qq clean           && \
-              rm -rf /var/lib/apt/lists/* && \
-              rm -rf /tmp/*               && \
+                ca-certificates=20210119 \
+                git=1:2.30.2-1 \
+                devscripts=2.21.2 \
+                "${packages[@]}"; \
+              apt-get -qq autoremove; \
+              apt-get -qq clean; \
+              rm -rf /var/lib/apt/lists/*; \
+              rm -rf /tmp/*; \
               rm -rf /var/tmp/*
 
-# Stop git from complaining about detached heads all the time
+# Prevent git from complaining about detached heads all the time
 RUN           git config --global advice.detachedHead false
 
-# The usefulness/security angle of this should be assessed.
-ADD           ./cache/overlay.tar /
+# This used to be necessary because of a bug in qemu/libc
+# Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
+# ADD           ./cache/overlay.tar /
 
 ENV           GOLANG_VERSION=1.16.5
-ENV           GOLANG_VERSION_PREVIOUS=1.15.13
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
-ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION_PREVIOUS.tar.gz /build/golang-previous
 
+# Add metadata
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ARG           BUILD_URL="https://github.com/dubo-dubon-duponey/docker-base"
 ARG           BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/docker-base"
@@ -127,77 +122,75 @@ LABEL         org.opencontainers.image.ref.name="$BUILD_REF_NAME"
 LABEL         org.opencontainers.image.title="$BUILD_TITLE"
 LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
 
-# Base
-ONBUILD ARG   TARGETPLATFORM
-ONBUILD ARG   TARGETOS
-ONBUILD ARG   TARGETARCH
-ONBUILD ARG   TARGETVARIANT
-
-ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   BUILDOS
-ONBUILD ARG   BUILDARCH
-ONBUILD ARG   BUILDVARIANT
-
-ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
-ONBUILD ARG   TERM="xterm"
-ONBUILD ARG   LANG="C.UTF-8"
-ONBUILD ARG   LC_ALL="C.UTF-8"
-ONBUILD ARG   TZ="America/Los_Angeles"
-
+# Image building from here can use this for buildtime (that is usually set at the time of the last commit to their repo)
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
-ONBUILD ARG   BUILD_VERSION="unknown"
-ONBUILD ARG   BUILD_REVISION="unknown"
 
-# CGO disabled by default
-ONBUILD ARG   CGO_ENABLED=0
+# Helper for our secrets
+# Pointing curl home out, allowing for /run/secrets/.curlrc to be seen automatically
+ENV           CURL_HOME=/run/secrets
+# go tools use this to find the netrc file
+ENV           NETRC=/run/secrets/NETRC
+# go tools honor this to find our CA
+ENV           SSL_CERT_FILE=/run/secrets/CA
 
-# Modules are on by default
-ONBUILD ARG   GO111MODULE=on
-ONBUILD ARG   GOPROXY="https://proxy.golang.org"
+# Go stuff
+# Images inheriting this will get a normal GOPROXY through the ARG (expected to go mod download), further inherits will get OFF (expected to ONLY build with no network)
+ENV           GOPROXY=off
+ONBUILD ARG   GOPROXY="https://proxy.golang.org,direct"
+# Modules are on by default unless specifically disabled by projects
+ENV           GO111MODULE=on
+
+# Location
+WORKDIR       /source
 
 #######################
 # Actual "builder" image (with node)
 #######################
 FROM          $FROM_IMAGE                                                                                               AS builder-node
 
-ARG           BUILD_TITLE="A DBDBDP image"
-ARG           BUILD_DESCRIPTION="So image. Much DBDBDP. Such description."
-LABEL         org.opencontainers.image.title="$BUILD_TITLE"
-LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
-
+# This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
 
-# Base
-ONBUILD ARG   TARGETPLATFORM
-ONBUILD ARG   TARGETOS
-ONBUILD ARG   TARGETARCH
-ONBUILD ARG   TARGETVARIANT
-
-ONBUILD ARG   BUILDPLATFORM
-ONBUILD ARG   BUILDOS
-ONBUILD ARG   BUILDARCH
-ONBUILD ARG   BUILDVARIANT
-
-ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
-ONBUILD ARG   TERM="xterm"
-ONBUILD ARG   LANG="C.UTF-8"
-ONBUILD ARG   LC_ALL="C.UTF-8"
-ONBUILD ARG   TZ="America/Los_Angeles"
-
-ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
-ONBUILD ARG   BUILD_VERSION="unknown"
-ONBUILD ARG   BUILD_REVISION="unknown"
-
-# Node stuff
-ENV           NODE_VERSION=14.17.1
+# Add node
+ENV           NODE_VERSION=14.17.2
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
 
-###########################################################
-# Node and Yarn install
-###########################################################
+# Add metadata
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
+ARG           BUILD_URL="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_SOURCE="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_VERSION="unknown"
+ARG           BUILD_REVISION="unknown"
+ARG           BUILD_VENDOR="dubodubonduponey"
+ARG           BUILD_LICENSES="MIT"
+ARG           BUILD_REF_NAME="latest"
+ARG           BUILD_TITLE="A DBDBDP image"
+ARG           BUILD_DESCRIPTION="So image. Much DBDBDP. Such description."
+
+LABEL         org.opencontainers.image.created="$BUILD_CREATED"
+LABEL         org.opencontainers.image.authors="Dubo Dubon Duponey <dubo-dubon-duponey@farcloser.world>"
+LABEL         org.opencontainers.image.url="$BUILD_URL"
+LABEL         org.opencontainers.image.documentation="$BUILD_DOCUMENTATION"
+LABEL         org.opencontainers.image.source="$BUILD_SOURCE"
+LABEL         org.opencontainers.image.version="$BUILD_VERSION"
+LABEL         org.opencontainers.image.revision="$BUILD_REVISION"
+LABEL         org.opencontainers.image.vendor="$BUILD_VENDOR"
+LABEL         org.opencontainers.image.licenses="$BUILD_LICENSES"
+LABEL         org.opencontainers.image.ref.name="$BUILD_REF_NAME"
+LABEL         org.opencontainers.image.title="$BUILD_TITLE"
+LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
+
+# Image building from here can use this for buildtime (that is usually set at the time of the last commit to their repo)
+ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
+
+# Location
+WORKDIR       /source
+
+# Node and Yarn post-install normalize
 RUN           ln -s /opt/node-*/bin/* /usr/local/bin/; \
               ln -s /opt/yarn-*/bin/yarn /usr/local/bin/; \
               ln -s /opt/yarn-*/bin/yarnpkg /usr/local/bin/; \

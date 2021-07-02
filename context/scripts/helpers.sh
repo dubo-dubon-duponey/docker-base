@@ -14,7 +14,7 @@ cache::download(){
   local url="$3"
 
   mkdir -p "$CACHE_ROOT/$arch"
-  [ -f "$CACHE_ROOT/$arch/$name" ] || curl --proto '=https' --tlsv1.2 -sSfL --compressed -o "$CACHE_ROOT/$arch/$name" "$url" >/dev/null 2>&1
+  [ -f "$CACHE_ROOT/$arch/$name" ] || curl --tlsv1.2 -sSfL --compressed -o "$CACHE_ROOT/$arch/$name" "$url" # >/dev/null 2>&1
 }
 
 cache::path(){
@@ -142,13 +142,13 @@ version::latest::patch(){
   local next_patch
 
   next_patch=$((patch + 1))
-  echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
-  while curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
-  #while [ "$(curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
+  #while [ "$(curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
     candidate_patch="$next_patch"
     next_patch=$((next_patch + 1))
-    echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
-    curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
     sleep 1
   done
 
@@ -173,13 +173,13 @@ version::latest::minor(){
 
   next_minor=$((minor + 1))
 
-  echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
-  while curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
-#  while [ "$(curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
+#  while [ "$(curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
     candidate_minor=${next_minor}
     next_minor=$((next_minor + 1))
-    echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
-    curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]" 1>&2
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]" 1>&2
     sleep 1
   done
 
@@ -205,12 +205,12 @@ version::latest::major(){
   local next_major
 
   next_major=$((major + increment))
-  echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
-  while curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
     candidate_major=${next_major}
     next_major=$((next_major + increment))
-    echo >&2 curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
-    curl --proto '=https' --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
     sleep 1
   done
   printf "%s.0.0" "$candidate_major"

@@ -98,9 +98,24 @@ init::node() {
     108F52B48DB57BB0CC439B2997B01419BD92F80A \
     B9E2F5981AA6E0CD28160D9FF13993A75599653C; do
     logger::debug "Importing Node key $key"
-    gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
-      gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
-      gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
+    # GPG is (still) such a fucking shitshow
+    local server
+    # XXX Discarded servers: hkps://keys.gnupg.net hkps://pgp.mit.edu hkps://keyoxide.org hkps://keybase.io; do
+    # hkps://keys.openpgp.org <- may work as well for some of them
+    for server in hkps://keyserver.ubuntu.com; do
+      >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+      # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
+      # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
+      # gpg: key F13993A75599653C: new key but contains no user ID - skipped
+      # gpg: Total number processed: 1
+      # gpg:           w/o user IDs: 1
+      # Quite effed-up ^, gpg
+      gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+      # && break || {
+      #  >&2 echo "No dice. Moving on to next server"
+      #  continue
+      #}
+    done
     gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
   done
 }
@@ -149,6 +164,9 @@ checksum::node() {
 
   cache::download "$arch" "node-$version.txt.asc" "https://nodejs.org/dist/v$version/SHASUMS256.txt.asc"
   cache::delete "$arch" "node-$version.txt"
+  >&2 echo gpg --batch --decrypt --output "$(cache::path "$arch" "node-$version.txt")" "$(cache::path "$arch" "node-$version.txt.asc")"
+  ls -lA "$(cache::path "$arch" "node-$version.txt.asc")"
+  cat "$(cache::path "$arch" "node-$version.txt.asc")"
   gpg --batch --decrypt --output "$(cache::path "$arch" "node-$version.txt")" "$(cache::path "$arch" "node-$version.txt.asc")"
   logger::debug "Verifying node signature"
 
@@ -181,9 +199,11 @@ checksum::node() {
 init::yarn() {
   local key=6A010C5166006599AA17F08146C2130DFD2497F5
   logger::debug "Importing Yarn key $key"
-  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
-    gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
-    gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
+  # hkps://keys.openpgp.org <- may work as well for some of them
+  for server in hkps://keyserver.ubuntu.com; do
+    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+  done
   gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
 }
 
@@ -212,15 +232,12 @@ checksum::yarn() {
   gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
 }
 
-logger::debug "Checking node"
-check::node
-logger::debug "Checking golang"
-check::golang
-check::golang_old
-logger::debug "Checking yarn"
-check::yarn
 
-for product in node yarn golang golang_old; do
+entrypoint(){
+  local product="$1"
+  logger::debug "Checking $product"
+  check::"$product"
+
   init::"$product"
 
   version="$(env::version::read "$product")"
@@ -238,4 +255,7 @@ for product in node yarn golang golang_old; do
       exit 1
     }
   done
-done
+
+}
+
+entrypoint "$@"

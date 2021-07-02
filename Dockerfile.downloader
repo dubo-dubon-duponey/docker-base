@@ -1,4 +1,4 @@
-ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-06-01@sha256:22779249c8878a001f1cf8acf4983501176f165536375839397719553a9d6311
+ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d162e34b3a53944cec3ba525b07ef6152ff391ed916de4ee4eb04debb019c8b0
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
@@ -6,7 +6,7 @@ FROM          $FROM_IMAGE                                                       
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ENV           NODE_VERSION=14.17.1
+ENV           NODE_VERSION=14.17.2
 ENV           YARN_VERSION=1.22.5
 
 ENV           GOLANG_VERSION 1.16.5
@@ -27,20 +27,16 @@ ENV           GOLANG_OLD_LINUX_386_SHA512 6c92732fb2ce75b084cb925e9813d45d626cae
 ENV           GOLANG_OLD_LINUX_S390X_SHA512 0739486667d6a9ea9514dce309afb28a38505ae49337fc3223dcff038685858afbe1f507b6d4d4b89872874e01d01ceac7f0f814f439fbdf4734a212188ee4c9
 ENV           GOLANG_OLD_LINUX_PPC64LE_SHA512 c8a7de65d4f633ee7c058070c6ebd01c3ebcfc9119e2371d18bb775b72b1961c705579df59c69c781eba29b0bbec901080c296ea568a12b610f70c65e2109cf4
 
-
 ENV           FAIL_WHEN_OUTDATED=true
 
-# Symlink deviation is necessary as ca-certificates will overwrite the crt file
 # hadolint ignore=DL3009
-RUN           --mount=type=secret,mode=0444,id=CA \
-              --mount=type=secret,id=CERTIFICATE \
-              --mount=type=secret,id=KEY \
-              --mount=type=secret,id=PASSPHRASE \
-              --mount=type=secret,mode=0444,id=GPG \
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
-              --mount=type=secret,id=APT_OPTIONS,dst=/etc/apt/apt.conf.d/dbdbdp.conf \
-              ln -s /run/secrets/CA /etc/ssl/certs/ca-certificates.crt; \
+              --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-cache show curl gnupg dirmngr ca-certificates; \
               apt-get install -qq --no-install-recommends \
@@ -49,20 +45,40 @@ RUN           --mount=type=secret,mode=0444,id=CA \
                 dirmngr=2.2.27-2 \
                 ca-certificates=20210119
 
-RUN           update-ca-certificates
-
 COPY          ./scripts /scripts
 
 COPY          ./cache /cache
 
-RUN           --mount=type=secret,mode=0444,id=CA \
+# Helper for our secrets
+ENV           CURL_HOME=/run/secrets
+
+RUN           --mount=type=secret,id=CA \
               --mount=type=secret,id=CERTIFICATE \
               --mount=type=secret,id=KEY \
-              --mount=type=secret,id=PASSPHRASE \
-              --mount=type=secret,mode=0444,id=GPG \
               --mount=type=secret,id=NETRC \
-              --mount=type=secret,id=CURL_OPTIONS,dst=/root/.curlrc \
-              /scripts/entrypoint.sh
+              --mount=type=secret,id=.curlrc \
+              /scripts/entrypoint.sh node
+
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              /scripts/entrypoint.sh yarn
+
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              /scripts/entrypoint.sh golang
+
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              /scripts/entrypoint.sh golang_old
 
 RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /cache -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +

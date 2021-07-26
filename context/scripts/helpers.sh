@@ -24,6 +24,8 @@ cache::path(){
   printf "%s/%s/%s" "$CACHE_ROOT" "$arch" "$name"
 }
 
+# XXX if something was corrupted in the existing cache that was mounted, no new download occured, and we just fail
+# One has to purge the local cache to fix that
 cache::delete(){
   local arch="$1"
   local name="$2"

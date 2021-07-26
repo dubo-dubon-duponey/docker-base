@@ -49,11 +49,11 @@ defaults: {
 		types.#Platforms.#S390X,
 		types.#Platforms.#ARM64,
 		// qemue / bullseye busted
-		// types.#Platforms.#PPC64LE,
+		types.#Platforms.#PPC64LE,
 	]
 
 	suite: "bullseye"
-	date: "2021-06-01"
+	date: "2021-07-01"
 	tarball: "\(suite)-\(date).tar"
 }
 
@@ -86,7 +86,8 @@ injector: {
 
 	_directory: * "context/debian/cache" | string @tag(directory, type=string)
 
-	_from_image: types.#Image & {#fromString: *"scratch" | string @tag(from_image, type=string)}
+	_from_image_runtime: types.#Image & {#fromString: *"ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d17b322f1920dd310d30913dd492cbbd6b800b62598f5b6a12d12684aad82296" | string @tag(from_image_runtime, type=string)}
+	_from_image_builder: types.#Image & {#fromString: *"ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d17b322f1920dd310d30913dd492cbbd6b800b62598f5b6a12d12684aad82296" | string @tag(from_image_builder, type=string)}
 	_from_tarball: *defaults.tarball | string @tag(from_tarball, type=string)
 }
 
@@ -102,16 +103,12 @@ cakes: {
 			input: {
 				root: "./"
 				context: "./context"
-				from: injector._from_image
+				from: builder: injector._from_image_builder
 		    dockerfile: "Dockerfile.downloader"
 			}
 			process: {
 		    target: "downloader"
 		    platforms: []
-				args: {
-					FROM_IMAGE: recipe.input.from.toString
-					// BUILD_CREATED: recipe.metadata.created
-				}
 			}
 			output: {
 				directory: "./context"
@@ -127,16 +124,12 @@ cakes: {
 			input: {
 				root: "./"
 				context: "./context"
-				from: injector._from_image
-				dockerfile: "Dockerfile.builder"
+				from: builder: injector._from_image_builder
+				dockerfile: "Dockerfile.runtime"
 			}
 			process: {
 	 			target: "overlay"
 		    platforms: []
-				args: {
-					FROM_IMAGE: recipe.input.from.toString
-					// BUILD_CREATED: recipe.metadata.created
-				}
 			}
 			output: {
 		    directory: "context/cache"
@@ -152,15 +145,12 @@ cakes: {
 			input: {
 				root: "./"
 				context: "./context"
-				from: injector._from_image
+				from: runtime: injector._from_image_runtime
 				dockerfile: "Dockerfile.builder"
 			}
 			process: {
 		    target: "builder"
 				platforms: injector._platforms
-				args: {
-					FROM_IMAGE: recipe.input.from.toString
-				}
 			}
 
 			output: {
@@ -177,21 +167,46 @@ cakes: {
 		icing: UserDefined
   }
 
+  auditor: scullery.#Cake & {
+		recipe: {
+			// XXX could be smarter in alternating from image and from tarball
+			input: {
+				root: "./"
+				context: "./context"
+				from: runtime: injector._from_image_runtime
+				dockerfile: "Dockerfile.auditor"
+			}
+			process: {
+		    target: "auditor"
+				platforms: injector._platforms
+			}
+
+			output: {
+				tags: injector._tags
+			}
+
+			// Standard metadata for the image
+			metadata: {
+				// ref_name: process.args.TARGET_SUITE + "-" + process.args.TARGET_DATE,
+				title: "Dubo Auditor",
+				description: "Auditor image",
+			}
+		}
+		icing: UserDefined
+  }
+
   node: scullery.#Cake & {
 		recipe: {
 			// XXX could be smarter in alternating from image and from tarball
 			input: {
 				root: "./"
 				context: "./context"
-				from: injector._from_image
+				from: runtime: injector._from_image_runtime
 				dockerfile: "Dockerfile.builder"
 			}
 			process: {
 		    target: "builder-node"
 				platforms: injector._platforms
-				args: {
-					FROM_IMAGE: recipe.input.from.toString
-				}
 			}
 			output: {
 				tags: injector._tags
@@ -211,15 +226,12 @@ cakes: {
 			input: {
 				root: "./"
 				context: "./context"
-				from: injector._from_image
+				from: runtime: injector._from_image_runtime
 				dockerfile: "Dockerfile.runtime"
 			}
 			process: {
 		    target: "runtime"
 				platforms: injector._platforms
-				args: {
-					FROM_IMAGE: recipe.input.from.toString
-				}
 			}
 			output: {
 				tags: injector._tags

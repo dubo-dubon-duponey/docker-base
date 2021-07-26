@@ -1,46 +1,8 @@
-ARG           FROM_IMAGE=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d162e34b3a53944cec3ba525b07ef6152ff391ed916de4ee4eb04debb019c8b0
-#######################
-# "Builder"
-# This image is meant to provide basic files copied over directly into the base target image.
-# Right now:
-# - ca-certificates: originally due to a bug in qemu / libc installing ca-certificates would fail 32bits systems, which prompted this deviation
-# The problem may (?) be fixed now in qemu6, although ca-certificates do install libssl and openssl, which is undesirable.
-# By installing out of band, on the native arch, and copying the files, we get to install trusted roots without the hassle of shipping openssl
-#######################
-FROM          $FROM_IMAGE                                                                                               AS overlay-builder
-
-ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
-
-RUN           --mount=type=secret,uid=100,id=CA \
-              --mount=type=secret,uid=100,id=CERTIFICATE \
-              --mount=type=secret,uid=100,id=KEY \
-              --mount=type=secret,uid=100,id=GPG.gpg \
-              --mount=type=secret,id=NETRC \
-              --mount=type=secret,id=APT_SOURCES \
-              --mount=type=secret,id=APT_CONFIG \
-              apt-get update -qq; \
-              apt-get install -qq --no-install-recommends \
-                ca-certificates=20210119
-
-RUN           update-ca-certificates
-
-RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
-              find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
-
-RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
-
-########################################################################################################################
-# Export of the above
-########################################################################################################################
-FROM          scratch                                                                                                   AS overlay
-# hadolint ignore=DL3010
-COPY          --from=overlay-builder /overlay.tar /overlay.tar
-
+ARG           FROM_IMAGE_RUNTIME=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d17b322f1920dd310d30913dd492cbbd6b800b62598f5b6a12d12684aad82296
 #######################
 # Actual "builder" image
 #######################
-FROM          $FROM_IMAGE                                                                                               AS builder
+FROM          $FROM_IMAGE_RUNTIME                                                                                       AS builder
 
 # This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
@@ -57,7 +19,9 @@ ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 # Might not work on same platform as the cross build target...
 # XXX WARNING
 # Something weird is happening here: for some reason, installing everything in one call breaks apt which complains about "broken packages being held"
-# Also, transient qemu core dumps (even with qemu 6), so... here be effing dragons  
+# Also, transient qemu core dumps (even with qemu 6), so... here be effing dragons
+
+# hadolint ignore=DL3008
 RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,uid=100,id=CERTIFICATE \
               --mount=type=secret,uid=100,id=KEY \
@@ -68,7 +32,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               packages=(); \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 dpkg --add-architecture "$architecture"; \
-                packages+=(crossbuild-essential-"$architecture"=12.9); \
+                packages+=(crossbuild-essential-"$architecture"=12.9 musl-dev:"$architecture"=1.2.2-1 musl:"$architecture"=1.2.2-1 libc6:"$architecture"=2.31-12 libc6-dev:"$architecture"=2.31-12); \
               done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
@@ -83,12 +47,14 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 git=1:2.30.2-1; \
               apt-get install -qq --no-install-recommends \
                 "${packages[@]}"; \
-              apt-get install -qq devscripts=2.21.2; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \
               rm -rf /tmp/*; \
               rm -rf /var/tmp/*
+
+# This drags in python3 (for no seemingly good reason for us since we just use hardening) - with qemu, it's a one hour long install
+#              apt-get install -qq devscripts=2.21.2; \
 
 # Prevent git from complaining about detached heads all the time
 RUN           git config --global advice.detachedHead false
@@ -97,7 +63,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.16.5
+ENV           GOLANG_VERSION=1.16.6
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -144,6 +110,28 @@ ENV           GOPROXY=off
 ONBUILD ARG   GOPROXY="https://proxy.golang.org,direct"
 # Modules are on by default unless specifically disabled by projects
 ENV           GO111MODULE=on
+# Make sure it's off by default
+ENV           CGO_ENABLED=0
+
+# C/C++/CGO stuff
+# https://news.ycombinator.com/item?id=18874113
+# https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc
+# https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+ENV           WARNING_OPTIONS="-Werror=implicit-function-declaration -Werror=format-security -Wall"
+# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#Optimize-Options
+ENV           OPTIMIZATION_OPTIONS="-O3"
+# https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html#Debugging-Options
+ENV           DEBUGGING_OPTIONS="-grecord-gcc-switches -g"
+# https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html#Preprocessor-Options
+ENV           PREPROCESSOR_OPTIONS="-Wp,-D_GLIBCXX_ASSERTION -D_FORTIFY_SOURCE=2"
+# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
+ENV           COMPILER_OPTIONS="-pipe -fexceptions -fstack-protector-strong -fstack-clash-protection"
+# AMD64 only
+# -mcet -fcf-protection
+# https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html#Link-Options
+ENV           LDFLAGS="-Wl,-z,relro -Wl,-z,now -Wl,-z,defs -Wl,-z,noexecstack"
+ENV           CFLAGS="$WARNING_OPTIONS $OPTIMIZATION_OPTIONS $DEBUGGING_OPTIONS $PREPROCESSOR_OPTIONS $COMPILER_OPTIONS"
+ENV           CXXFLAGS="$CFLAGS"
 
 # Location
 WORKDIR       /source
@@ -151,13 +139,13 @@ WORKDIR       /source
 #######################
 # Actual "builder" image (with node)
 #######################
-FROM          $FROM_IMAGE                                                                                               AS builder-node
+FROM          $FROM_IMAGE_RUNTIME                                                                                       AS builder-node
 
 # This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=14.17.2
+ENV           NODE_VERSION=14.17.3
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt

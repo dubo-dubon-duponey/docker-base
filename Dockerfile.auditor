@@ -1,0 +1,64 @@
+ARG           FROM_IMAGE_RUNTIME=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d17b322f1920dd310d30913dd492cbbd6b800b62598f5b6a12d12684aad82296
+
+# XXX a new experimental image meant for auditing shit
+FROM          $FROM_IMAGE_RUNTIME                                                                                       AS auditor
+
+# hadolint ignore=DL3008
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              packages=(); \
+              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                dpkg --add-architecture "$architecture"; \
+                packages+=(libc6:"$architecture"=2.31-12); \
+              done; \
+              apt-get update -qq; \
+              apt-get install -qq --no-install-recommends \
+                curl=7.74.0-1.2 file=1:5.39-3 binutils=2.35.2-2 schroot=1.6.10-12 procps=2:3.3.17-5 lynis=3.0.2-1 iproute2=5.10.0-4 devscripts=2.21.2; \
+              apt-get install -qq --no-install-recommends \
+                "${packages[@]}"; \
+              apt-get -qq autoremove; \
+              apt-get -qq clean; \
+              rm -rf /var/lib/apt/lists/*; \
+              rm -rf /tmp/*; \
+              rm -rf /var/tmp/*
+
+# Add metadata
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
+ARG           BUILD_URL="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_SOURCE="https://github.com/dubo-dubon-duponey/docker-base"
+ARG           BUILD_VERSION="unknown"
+ARG           BUILD_REVISION="unknown"
+ARG           BUILD_VENDOR="dubodubonduponey"
+ARG           BUILD_LICENSES="MIT"
+ARG           BUILD_REF_NAME="latest"
+ARG           BUILD_TITLE="A DBDBDP image"
+ARG           BUILD_DESCRIPTION="So image. Much DBDBDP. Such description."
+
+LABEL         org.opencontainers.image.created="$BUILD_CREATED"
+LABEL         org.opencontainers.image.authors="Dubo Dubon Duponey <dubo-dubon-duponey@farcloser.world>"
+LABEL         org.opencontainers.image.url="$BUILD_URL"
+LABEL         org.opencontainers.image.documentation="$BUILD_DOCUMENTATION"
+LABEL         org.opencontainers.image.source="$BUILD_SOURCE"
+LABEL         org.opencontainers.image.version="$BUILD_VERSION"
+LABEL         org.opencontainers.image.revision="$BUILD_REVISION"
+LABEL         org.opencontainers.image.vendor="$BUILD_VENDOR"
+LABEL         org.opencontainers.image.licenses="$BUILD_LICENSES"
+LABEL         org.opencontainers.image.ref.name="$BUILD_REF_NAME"
+LABEL         org.opencontainers.image.title="$BUILD_TITLE"
+LABEL         org.opencontainers.image.description="$BUILD_DESCRIPTION"
+
+# Image building from here can use this for buildtime (that is usually set at the time of the last commit to their repo)
+ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
+
+# Helper for our secrets
+# Pointing curl home out, allowing for /run/secrets/.curlrc to be seen automatically
+ENV           CURL_HOME=/run/secrets
+
+# Location
+WORKDIR       /dist

@@ -200,7 +200,6 @@ cakes: {
   }
 }
 
-
 // Allow hooking-in a UserDefined environment as icing
 UserDefined: scullery.#Icing
 
@@ -242,14 +241,24 @@ overrides: {
 		"ghcr.io": "dubo-dubon-duponey",
 		"docker.io": "dubodubonduponey"
 	}
-
-	output: images: tags: [injectors.suite + "-" + injectors.date, injectors.suite + "-latest", "latest"]
-
-	metadata: ref_name: injectors.suite + "-" + injectors.date
 }
 
 cakes: golang: recipe: overrides
+cakes: golang: recipe: output: images: tags: ["golang-" + injectors.suite + "-" + injectors.date, "golang-" + injectors.suite + "-latest", "golang-latest"]
+cakes: golang: recipe: metadata: ref_name: "golang-" + injectors.suite + "-" + injectors.date
+
 cakes: runtime: recipe: overrides
+cakes: runtime: recipe: output: images: tags: ["runtime-" + injectors.suite + "-" + injectors.date, "runtime-" + injectors.suite + "-latest", "runtime-latest"]
+cakes: runtime: recipe: metadata: ref_name: "runtime-" + injectors.suite + "-" + injectors.date
+
 cakes: builder: recipe: overrides
+cakes: builder: recipe: output: images: tags: ["builder-" + injectors.suite + "-" + injectors.date, "builder-" + injectors.suite + "-latest", "builder-latest"]
+cakes: builder: recipe: metadata: ref_name: "builder-" + injectors.suite + "-" + injectors.date
+
 cakes: node: recipe: overrides
+cakes: node: recipe: output: images: tags: ["node-" + injectors.suite + "-" + injectors.date, "node-" + injectors.suite + "-latest", "node-latest"]
+cakes: node: recipe: metadata: ref_name: "node-" + injectors.suite + "-" + injectors.date
+
 cakes: auditor: recipe: overrides
+cakes: auditor: recipe: output: images: tags: ["auditor-" + injectors.suite + "-" + injectors.date, "auditor-" + injectors.suite + "-latest", "auditor-latest"]
+cakes: auditor: recipe: metadata: ref_name: "auditor-" + injectors.suite + "-" + injectors.date

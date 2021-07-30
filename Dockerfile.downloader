@@ -1,12 +1,13 @@
-ARG           FROM_IMAGE_BUILDER=ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01@sha256:d17b322f1920dd310d30913dd492cbbd6b800b62598f5b6a12d12684aad82296
+ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2021-07-01@sha256:e7b349e88dd4c56dd9a0bbea9a0e9d7df8817c392bcbcc7167ae51e1eda9a5a5
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
 #######################
-FROM          $FROM_IMAGE_BUILDER                                                                                       AS downloader-builder
+FROM          $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                                                        AS downloader-builder
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ENV           NODE_VERSION=14.17.3
+ENV           NODE_VERSION=14.17.4
 ENV           YARN_VERSION=1.22.5
 
 ENV           GOLANG_VERSION 1.16.6

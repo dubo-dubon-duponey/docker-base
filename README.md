@@ -40,7 +40,7 @@ You can control additional aspects of the build passing arguments:
 ```
 # Control base image, target platforms, and cache
 ./hack/build.sh runtime \
-  --inject from_image="ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-07-01" \
+  --inject from_image="ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-08-01" \
   --inject platforms="linux/arm/v6" \
   --inject cache_base=type=registry,ref=somewhere.com/cache/foo
 ```

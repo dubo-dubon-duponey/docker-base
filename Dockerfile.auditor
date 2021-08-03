@@ -15,11 +15,11 @@ RUN           --mount=type=secret,uid=100,id=CA \
               packages=(); \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 dpkg --add-architecture "$architecture"; \
-                packages+=(libc6:"$architecture"=2.31-12); \
+                packages+=(libc6:"$architecture"=2.31-13); \
               done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.2 file=1:5.39-3 binutils=2.35.2-2 schroot=1.6.10-12 procps=2:3.3.17-5 lynis=3.0.2-1 iproute2=5.10.0-4 devscripts=2.21.2; \
+                curl=7.74.0-1.3+b1 file=1:5.39-3 binutils=2.35.2-2 schroot=1.6.10-12 procps=2:3.3.17-5 lynis=3.0.2-1 iproute2=5.10.0-4 devscripts=2.21.3; \
               apt-get install -qq --no-install-recommends \
                 "${packages[@]}"; \
               apt-get -qq autoremove; \

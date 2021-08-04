@@ -5,14 +5,14 @@ Provides base images (builder and runtime) used by all our images.
 Currently, on linux amd64, 386, arm64, arm/v7, arm/v6, s390x, ppc64le:
 
 * `dubodubonduponey/base:runtime-latest` and `dubodubonduponey/base:runtime-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-07-01`)
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-08-01`)
   * labels
   * ca-certificates copied over
   * ONBUILD instructions to copy over runtime folders
   * user creation
   * entrypoint definition
 * `dubodubonduponey/base:builder-latest` and `dubodubonduponey/base:builder-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-07-01`)
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-08-01`)
   * golang, python, and essential dev & build tools
 * `dubodubonduponey/base:node-latest` and `dubodubonduponey/base:node-$SUITE-$DATE`
   * +nodejs +yarnpkg

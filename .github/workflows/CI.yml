@@ -23,7 +23,7 @@ jobs:
         # XXX move to container tooling
       - name: Install hadolint
         run: |
-          curl --proto '=https' --tlsv1.3 -sSfL -o hadolint "https://github.com/hadolint/hadolint/releases/download/v2.5.0/hadolint-$(uname -s)-$(uname -m)"
+          curl --proto '=https' --tlsv1.3 -sSfL -o hadolint "https://github.com/hadolint/hadolint/releases/download/v2.6.0/hadolint-$(uname -s)-$(uname -m)"
           chmod 700 ./hadolint
 
       # XXX update this to a more recent apt proxy

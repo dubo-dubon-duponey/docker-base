@@ -51,9 +51,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"ghcr.io": "dubo-dubon-duponey",
-					},
 					names: [...string] | * ["base"],
 					tags: [...string] | * ["builder-latest"]
 				}
@@ -86,9 +83,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"ghcr.io": "dubo-dubon-duponey",
-					},
 					names: [...string] | * ["base"],
 					tags: [...string] | * ["auditor-latest"]
 				}
@@ -119,9 +113,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"ghcr.io": "dubo-dubon-duponey",
-					},
 					names: [...string] | * ["base"],
 					tags: [...string] | * ["node-latest"]
 				}
@@ -154,9 +145,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"ghcr.io": "dubo-dubon-duponey",
-					},
 					names: [...string] | * ["base"],
 					tags: [...string] | * ["golang-latest"]
 				}
@@ -189,9 +177,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"ghcr.io": "dubo-dubon-duponey",
-					},
 					names: [...string] | * ["base"],
 					tags: [...string] | * ["golang-latest"]
 				}
@@ -239,12 +224,6 @@ overrides: {
 
 	if injectors.platforms != _|_ {
 		process: platforms: strings.Split(injectors.platforms, ",")
-	}
-
-	output: images: registries: {
-		"push-registry.local": "dubo-dubon-duponey",
-		"ghcr.io": "dubo-dubon-duponey",
-		"docker.io": "dubodubonduponey"
 	}
 }
 

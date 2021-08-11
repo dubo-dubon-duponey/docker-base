@@ -55,9 +55,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 # We use this to set mtime on newly created folders
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-# We store binaries in /boot/bin and libs in /boot/lib
+# We store binaries in /boot/bin
 ENV           PATH=/boot/bin:$PATH
-ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 
 # Allows one to pick a specific UID for the user, at build time
 ONBUILD ARG   BUILD_UID=2000

@@ -101,6 +101,7 @@ ENV           CURL_HOME=/run/secrets
 # go tools use this to find the netrc file
 ENV           NETRC=/run/secrets/NETRC
 # go tools honor this to find our CA
+# XXX this is problematic - rust also uses this - if the file does not exist, at least rust will tits-up
 ENV           SSL_CERT_FILE=/run/secrets/CA
 
 # Go stuff
@@ -129,9 +130,9 @@ ENV           COMPILER_OPTIONS="-pipe -fexceptions -fstack-protector-strong -fst
 # -mcet -fcf-protection
 # https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html#Link-Options
 ENV           LDFLAGS="-Wl,-z,relro -Wl,-z,now -Wl,-z,defs -Wl,-z,noexecstack"
-ENV           CFLAGS="$WARNING_OPTIONS $OPTIMIZATION_OPTIONS $DEBUGGING_OPTIONS $PREPROCESSOR_OPTIONS $COMPILER_OPTIONS"
+ENV           CFLAGS="$WARNING_OPTIONS $OPTIMIZATION_OPTIONS $DEBUGGING_OPTIONS $PREPROCESSOR_OPTIONS $COMPILER_OPTIONS -s"
 # Werror=implicit-function-declaration is not allowed for CXX
-ENV           CXXFLAGS="-Werror=format-security -Wall $OPTIMIZATION_OPTIONS $DEBUGGING_OPTIONS $PREPROCESSOR_OPTIONS $COMPILER_OPTIONS"
+ENV           CXXFLAGS="-Werror=format-security -Wall $OPTIMIZATION_OPTIONS $DEBUGGING_OPTIONS $PREPROCESSOR_OPTIONS $COMPILER_OPTIONS -s"
 
 # Location
 WORKDIR       /source
@@ -275,3 +276,6 @@ ONBUILD ARG   GOPROXY="https://proxy.golang.org,direct"
 ENV           GO111MODULE=on
 # Make sure it's off by default
 ENV           CGO_ENABLED=0
+
+# Make sure git stops whining about detached heads
+RUN           git config --global advice.detachedHead false

@@ -69,29 +69,55 @@ url::golang() {
 }
 
 init::node() {
-  # First key is for Yarn, the rest for Node
+  # Older keys
+  # 9554F04D7259F04124DE6B476D5A82AC7E37093B
+  # 1C050899334244A8AF75E53792EF661D867B9DFA
+  # B9AE9905FFD7803F25714661B63B535A4C206CA9
+  # 77984A986EBC2AA786BC0F66B01FBB92821C587A
+  # 93C7E9E91B49E432C2F75674B0A78B0A6C481CF6
+  # 56730D5401028683275BD23C23EFEFE93C4CFFFE
+  # FD3A5288F042B6850C66B31F09FE44734EB7990E
+  # 114F43EE0176B71C7BC219DD50A3051F888C628D
+  # 7937DFD2AB06298B2293C3187D33FF9D0246406D
+
+  # From https://github.com/nodejs/node#release-keys
   for key in \
-    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-    FD3A5288F042B6850C66B31F09FE44734EB7990E \
-    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-    77984A986EBC2AA786BC0F66B01FBB92821C587A \
-    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
     4ED778F539E3634C779C87C6D7062848A1AB005C \
+    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+    74F12602B6F1C4E913FAA37AD3A89613643B6201 \
+    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
+    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+    C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \
+    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
     A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
+    108F52B48DB57BB0CC439B2997B01419BD92F80A \
     B9E2F5981AA6E0CD28160D9FF13993A75599653C; do
     logger::debug "Importing Node key $key"
-    gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
-      gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
-      gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
+    # GPG is (still) such a fucking shitshow
+    local server
+    # XXX Discarded servers: hkps://keys.gnupg.net hkps://pgp.mit.edu hkps://keyoxide.org hkps://keybase.io; do
+    # hkps://keys.openpgp.org <- may work as well for some of them
+    for server in hkps://keyserver.ubuntu.com; do
+      >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+      # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
+      # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
+      # gpg: key F13993A75599653C: new key but contains no user ID - skipped
+      # gpg: Total number processed: 1
+      # gpg:           w/o user IDs: 1
+      # Quite effed-up ^, gpg
+      gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+      # && break || {
+      #  >&2 echo "No dice. Moving on to next server"
+      #  continue
+      #}
+    done
     gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
   done
 }
 
 platforms::node() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/ppc64le linux/s390x"
+  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/ppc64le linux/s390x" # linux/arm/v6
 }
 
 url::node() {
@@ -112,9 +138,9 @@ url::node() {
   "linux/arm/v7")
     arch="linux-armv7l"
     ;;
-  "linux/arm/v6")
-    arch="linux-armv6l"
-    ;;
+  #"linux/arm/v6")
+  #  arch="linux-armv6l"
+  #  ;;
   "linux/ppc64le")
     arch="linux-ppc64le"
     ;;
@@ -134,6 +160,9 @@ checksum::node() {
 
   cache::download "$arch" "node-$version.txt.asc" "https://nodejs.org/dist/v$version/SHASUMS256.txt.asc"
   cache::delete "$arch" "node-$version.txt"
+  >&2 echo gpg --batch --decrypt --output "$(cache::path "$arch" "node-$version.txt")" "$(cache::path "$arch" "node-$version.txt.asc")"
+  ls -lA "$(cache::path "$arch" "node-$version.txt.asc")"
+  cat "$(cache::path "$arch" "node-$version.txt.asc")"
   gpg --batch --decrypt --output "$(cache::path "$arch" "node-$version.txt")" "$(cache::path "$arch" "node-$version.txt.asc")"
   logger::debug "Verifying node signature"
 
@@ -164,12 +193,13 @@ checksum::node() {
 }
 
 init::yarn() {
-  # First key is for Yarn, the rest for Node
   local key=6A010C5166006599AA17F08146C2130DFD2497F5
   logger::debug "Importing Yarn key $key"
-  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null ||
-    gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net:80 "${gpgopts[@]}" "$key" 2>/dev/null  ||
-    gpg --batch --keyserver hkp://pgp.mit.edu:80 "${gpgopts[@]}" "$key" 2>/dev/null
+  # hkps://keys.openpgp.org <- may work as well for some of them
+  for server in hkps://keyserver.ubuntu.com; do
+    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+  done
   gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
 }
 
@@ -198,23 +228,30 @@ checksum::yarn() {
   gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
 }
 
-check::node
-check::golang
-check::yarn
 
-for product in golang node yarn; do
+entrypoint(){
+  local product="$1"
+  logger::debug "Checking $product"
+  check::"$product"
+
   init::"$product"
 
   version="$(env::version::read "$product")"
 
   for platform in $(platforms::"$product"); do
     binary="$product-$version.tar.gz"
-    cache::download "$platform" "$binary" "$(url::"$product" "$platform" "$version")"
+    cache::download "$platform" "$binary" "$(url::"$product" "$platform" "$version")" || {
+      logger::error "PANIC. Failed downloading $(url::"$product" "$platform" "$version")"
+      exit 1
+    }
 
     checksum::"$product" "$platform" "$version" "$binary" || {
       logger::error "Checksum FAIL! Deleting artifact ($product $platform $version: $binary - checksum was $(cache::checksum::compute "$platform" "$binary"))"
+      logger::error "If this was mounted from local cache, you must also remove it on the host (under ./context/cache/linux/$platform/$binary)"
       cache::delete "$platform" "$binary"
       exit 1
     }
   done
-done
+}
+
+entrypoint "$@"

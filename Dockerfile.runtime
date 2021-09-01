@@ -1,4 +1,45 @@
-ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6d34fc25d6420c50d7ae8e0ca26e6bf89779437feb0
+ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+
+#######################
+# Overlay
+# This image is meant to provide basic files copied over directly into the base target image.
+# Right now:
+# - ca-certificates: originally due to a bug in qemu / libc installing ca-certificates would fail 32bits systems, which prompted this deviation
+# The problem may (?) be fixed now in qemu6, although ca-certificates do install libssl and openssl, which is undesirable.
+# By installing out of band, on the native arch, and copying the files, we get to install trusted roots without the hassle of shipping openssl
+#######################
+FROM          $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                                                        AS overlay-builder
+
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
+
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              apt-get update -qq; \
+              apt-get install -qq --no-install-recommends \
+                ca-certificates=20210119
+
+RUN           update-ca-certificates
+
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
+RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
+
+########################################################################################################################
+# Export of the above
+########################################################################################################################
+FROM          scratch                                                                                                   AS overlay
+# hadolint ignore=DL3010
+COPY          --from=overlay-builder /overlay.tar /overlay.tar
+
 #######################
 # Runtime base
 # Base image for all runtime environments.
@@ -9,35 +50,18 @@ ARG           RUNTIME_BASE=dubodubonduponey/debian@sha256:04f7bfea58c6c4af846af6
 # - anything useful from the builder-generic image
 # - automatic entrypoint definition and user setting
 #######################
-# hadolint ignore=DL3006
-FROM          $RUNTIME_BASE                                                                                             AS runtime
+FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS runtime
 
-ARG           DEBIAN_FRONTEND="noninteractive"
-ENV           TERM="xterm"
-ENV           LANG="C.UTF-8"
-ENV           LC_ALL="C.UTF-8"
-ENV           TZ="America/Los_Angeles"
+# We use this to set mtime on newly created folders
+ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
+# We store binaries in /boot/bin
 ENV           PATH=/boot/bin:$PATH
-ENV           LD_LIBRARY_PATH=/boot/lib:$LD_LIBRARY_PATH
 
-# Base
-ONBUILD ARG   DEBIAN_FRONTEND="noninteractive"
-
-# Apt behavior
-ONBUILD ARG   APT_OPTIONS
-ONBUILD ARG   APT_SOURCES
-ONBUILD ARG   APT_GPG_KEYRING
-ONBUILD ARG   APT_NETRC
-ONBUILD ARG   APT_TLS_CA
-
-ONBUILD ARG   http_proxy
-ONBUILD ARG   https_proxy
-
-# Build args
+# Allows one to pick a specific UID for the user, at build time
 ONBUILD ARG   BUILD_UID=2000
 
-# Labels build args
+# Metadata
 ONBUILD ARG   BUILD_CREATED="1976-04-14T17:00:00-07:00"
 ONBUILD ARG   BUILD_URL="https://github.com/dubo-dubon-duponey/nonexistent"
 ONBUILD ARG   BUILD_DOCUMENTATION="https://github.com/dubo-dubon-duponey/nonexistent"
@@ -63,10 +87,15 @@ ONBUILD LABEL org.opencontainers.image.ref.name="$BUILD_REF_NAME"
 ONBUILD LABEL org.opencontainers.image.title="$BUILD_TITLE"
 ONBUILD LABEL org.opencontainers.image.description="$BUILD_DESCRIPTION"
 
-# The usefulness/security angle of this should be assessed.
-ADD           ./overlay.tar /
+# XXX The usefulness/security angle of this should be assessed.
+ADD           ./cache/overlay.tar /
 
-# Create a restricted user account (no shell, no home, disabled), and add folders
+# Set a restrictive umask by default
+RUN           echo "umask 0700" > /etc/profile.d/dbdbdp; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              touch --no-dereference --date="@$epoch" /etc/profile.d/dbdbdp
+
+# Create a restricted user account (no shell, no home, disabled), and add our folders
 RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid 2000 \
                 dubo-dubon-duponey; \
@@ -84,30 +113,38 @@ RUN           adduser --system --no-create-home --home /nonexistent --gecos "in 
               touch --no-dereference --date="@$epoch" /data; \
               touch --no-dereference --date="@$epoch" /certs;
 
-# Get all relevant files from onbuild
+# Fix timestamp on files altered by user creation and ca-certificates to fix reproducibility
+# NOTE: this is somewhat problematic. BUILD_CREATED could be older than the Debian image it is using.
+# Burden is on the maintainer to avoid that
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              touch --no-dereference --date="@$epoch" /etc/shadow; \
+              touch --no-dereference --date="@$epoch" /etc/shadow-; \
+              touch --no-dereference --date="@$epoch" /etc/passwd; \
+              touch --no-dereference --date="@$epoch" /etc/passwd-; \
+              touch --no-dereference --date="@$epoch" /etc/subuid; \
+              touch --no-dereference --date="@$epoch" /etc/subgid
+
+# Get all relevant files at build time, from a "runtime" folder under context
 ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
 
-# XXX it seems this may be busting docker build cache capabilities... builds are not cached anymore after that... which is annoying when there is large dependencies (ffmpeg)
-# XXX this was changed dramatically - is this problem still true?
 # Setup directories and permissions
 # The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
 # Write is granted, although that doesn't really matter in term of security
-ONBUILD RUN   set -eu; \
-              [ "$BUILD_UID" -eq "2000" ] || { \
+ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
                 usermod -u "$BUILD_UID" dubo-dubon-duponey; \
                 chown -R $BUILD_UID:root /boot; \
                 chown -R $BUILD_UID:root /config; \
                 chown -R $BUILD_UID:root /data; \
                 chown -R $BUILD_UID:root /certs; \
               }; \
-              find /boot   -type d -exec chmod -R 555 {} +; \
-              find /config -type d -exec chmod -R 555 {} +; \
-              find /data   -type d -exec chmod -R 777 {} +; \
-              find /certs  -type d -exec chmod -R 777 {} +; \
-              find /boot   -type f -exec chmod -R 555 {} +; \
-              find /config -type f -exec chmod -R 444 {} +; \
-              find /data   -type f -exec chmod -R 666 {} +; \
-              find /certs  -type f -exec chmod -R 666 {} +; \
+              find /boot   -type d -exec chmod -R 550 {} +; \
+              find /config -type d -exec chmod -R 550 {} +; \
+              find /data   -type d -exec chmod -R 770 {} +; \
+              find /certs  -type d -exec chmod -R 770 {} +; \
+              find /boot   -type f -exec chmod -R 550 {} +; \
+              find /config -type f -exec chmod -R 440 {} +; \
+              find /data   -type f -exec chmod -R 660 {} +; \
+              find /certs  -type f -exec chmod -R 660 {} +; \
               epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /boot -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /config -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \

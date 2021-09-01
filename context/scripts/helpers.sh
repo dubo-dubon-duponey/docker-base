@@ -3,6 +3,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 #############################################################
 # Cache helpers
+# XXX it seems like yarn at least does not support tls v1.3, so, only enforcing 1.2 for now
 #############################################################
 readonly CACHE_ROOT=/cache
 
@@ -13,9 +14,7 @@ cache::download(){
   local url="$3"
 
   mkdir -p "$CACHE_ROOT/$arch"
-  if [ ! -f "$CACHE_ROOT/$arch/$name" ]; then
-    curl -fsSL --compressed -o "$CACHE_ROOT/$arch/$name" "$url" >/dev/null 2>&1
-  fi
+  [ -f "$CACHE_ROOT/$arch/$name" ] || curl --tlsv1.2 -sSfL --compressed -o "$CACHE_ROOT/$arch/$name" "$url" # >/dev/null 2>&1
 }
 
 cache::path(){
@@ -25,6 +24,8 @@ cache::path(){
   printf "%s/%s/%s" "$CACHE_ROOT" "$arch" "$name"
 }
 
+# XXX if something was corrupted in the existing cache that was mounted, no new download occured, and we just fail
+# One has to purge the local cache to fix that
 cache::delete(){
   local arch="$1"
   local name="$2"
@@ -101,7 +102,7 @@ logger::stamp(){
   shift
   [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput setaf "$color"
   for i in "$@"; do
-    >&2 printf "[%s] [%s] %s\n" "$(date)" "$level" "$i"
+    printf >&2 "[%s] [%s] %s\n" "$(date)" "$level" "$i"
   done
   [ ! "$TERM" ] || [ ! -t 2 ] || >&2 tput op
 }
@@ -143,10 +144,16 @@ version::latest::patch(){
   local next_patch
 
   next_patch=$((patch + 1))
-  while [ "$(curl -I -L -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
+  #while [ "$(curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
     candidate_patch="$next_patch"
     next_patch=$((next_patch + 1))
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$minor" "$next_patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
+    sleep 1
   done
+
   printf "%s.%s.%s" "$major" "$minor" "$candidate_patch"
   if [ "$candidate_patch" != "$patch" ];then
     return 1
@@ -168,11 +175,16 @@ version::latest::minor(){
 
   next_minor=$((minor + 1))
 
-
-  while [ "$(curl -I -L -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
+#  while [ "$(curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
     candidate_minor=${next_minor}
     next_minor=$((next_minor + 1))
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$major" "$next_minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]" 1>&2
+    sleep 1
   done
+
   printf "%s.%s.0" "$major" "$candidate_minor"
   if [ "$candidate_minor" != "$minor" ];then
     return 1
@@ -195,9 +207,13 @@ version::latest::major(){
   local next_major
 
   next_major=$((major + increment))
-  while [ "$(curl -I -L -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+ [0-9]{3}" | tail -1 | sed -E 's/.* ([0-9]{3}).*/\1/')" != "404" ]; do
+  echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
+  while curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -qE "HTTP/[0-9. ]+ 200"; do
     candidate_major=${next_major}
     next_major=$((next_major + increment))
+    echo >&2 curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")"
+    curl --tlsv1.2 -L -I -o /dev/null -v "$("$urlfunction" "$platform" "$next_major" "$minor" "$patch")" 2>&1 | grep -E "HTTP/[0-9.]+" 1>&2
+    sleep 1
   done
   printf "%s.0.0" "$candidate_major"
   if [ "$candidate_major" != "$major" ];then

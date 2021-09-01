@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-08-01@sha256:10d2faa8ae10c9107b95a1c29f816c788c058877802df9aef544a3b8c6663293
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
 
 #######################
 # Actual "builder" image

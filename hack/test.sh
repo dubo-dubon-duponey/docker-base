@@ -3,8 +3,9 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 # shellcheck source=/dev/null
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/../"
-# shellcheck source=/dev/null
-. "$root"/hack/setup.sh
+readonly root
+
+BIN_LOCATION="$root/cache/bin" source "$root/hack/helpers/install-tools.sh"
 
 # XXX right now this is not testing much but the runtime image building
 if ! "$root/hack/build.sh" \

@@ -9,7 +9,7 @@ readonly root
 if ! "$root/hack/build.sh" \
     --inject registry="ghcr.io/dubo-dubon-duponey" \
     --inject progress=plain \
-	  --inject date=2021-08-01 \
+	  --inject date=2021-09-01 \
 	  --inject suite=bullseye \
     --inject platforms=linux/amd64,linux/arm64 \
   	overlay "$@"; then
@@ -20,7 +20,7 @@ fi
 if ! "$root/hack/build.sh" \
     --inject registry="ghcr.io/dubo-dubon-duponey" \
     --inject progress=plain \
-	  --inject date=2021-08-01 \
+	  --inject date=2021-09-01 \
 	  --inject suite=bullseye \
     --inject platforms=linux/amd64,linux/arm64 \
   	runtime "$@"; then

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-15@sha256:a0cf7d86e967172d1bdddbb472d63329af880765ed212915d57930b3379efbc4
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor

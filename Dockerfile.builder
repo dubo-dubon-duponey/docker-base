@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-15@sha256:a0cf7d86e967172d1bdddbb472d63329af880765ed212915d57930b3379efbc4
 
 #######################
 # Actual "builder" image
@@ -62,7 +62,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.16.7
+ENV           GOLANG_VERSION=1.16.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -205,7 +205,7 @@ ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-ENV           GOLANG_VERSION=1.16.7
+ENV           GOLANG_VERSION=1.16.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

@@ -98,20 +98,21 @@ init::node() {
     local server
     # XXX Discarded servers: hkps://keys.gnupg.net hkps://pgp.mit.edu hkps://keyoxide.org hkps://keybase.io; do
     # hkps://keys.openpgp.org <- may work as well for some of them
-    for server in hkps://keyserver.ubuntu.com; do
-      >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
-      # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
-      # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
-      # gpg: key F13993A75599653C: new key but contains no user ID - skipped
-      # gpg: Total number processed: 1
-      # gpg:           w/o user IDs: 1
-      # Quite effed-up ^, gpg
-      gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
-      # && break || {
-      #  >&2 echo "No dice. Moving on to next server"
-      #  continue
-      #}
-    done
+    #for server in hkps://keyserver.ubuntu.com; do
+    server=hkps://keyserver.ubuntu.com
+    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+    # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
+    # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
+    # gpg: key F13993A75599653C: new key but contains no user ID - skipped
+    # gpg: Total number processed: 1
+    # gpg:           w/o user IDs: 1
+    # Quite effed-up ^, gpg
+    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+    # && break || {
+    #  >&2 echo "No dice. Moving on to next server"
+    #  continue
+    #}
+    #done
     gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
   done
 }
@@ -196,10 +197,11 @@ init::yarn() {
   local key=6A010C5166006599AA17F08146C2130DFD2497F5
   logger::debug "Importing Yarn key $key"
   # hkps://keys.openpgp.org <- may work as well for some of them
-  for server in hkps://keyserver.ubuntu.com; do
-    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
-    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
-  done
+  #for server in hkps://keyserver.ubuntu.com; do
+  local server=hkps://keyserver.ubuntu.com
+  >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+  gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+  #done
   gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
 }
 

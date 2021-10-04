@@ -154,4 +154,16 @@ ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
 # Finally downgrade to system user
 ONBUILD USER  dubo-dubon-duponey
 
-ENTRYPOINT  ["/boot/entrypoint.sh"]
+# Disable weak cryptography in GNUTLS
+ENV           GNUTLS_FORCE_FIPS_MODE=1
+
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+ENV           XDG_DATA_HOME=/data
+ENV           XDG_DATA_DIRS=/data
+ENV           XDG_CONFIG_HOME=/config
+ENV           XDG_CONFIG_DIRS=/config
+ENV           XDG_RUNTIME_DIR=/tmp/runtime
+ENV           XDG_STATE_HOME=/tmp/state
+ENV           XDG_CACHE_HOME=/tmp/cache
+
+ENTRYPOINT    ["/boot/entrypoint.sh"]

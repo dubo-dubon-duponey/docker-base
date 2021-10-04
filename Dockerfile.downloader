@@ -8,7 +8,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ENV           NODE_VERSION=14.17.6
+ENV           NODE_VERSION=14.18.0
 ENV           YARN_VERSION=1.22.5
 
 ENV           GOLANG_VERSION 1.16.8

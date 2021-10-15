@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-10-01@sha256:a7606a62eb3333b41d8592c551de866b55ecc7bdee5b05bd0e9ca0ab356da83d
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-10-15@sha256:458b490df863df7f395d35de46abf2f8c86cde3239c513a7ab3f28817f8ac1c6
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor
@@ -12,19 +12,19 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
-              packages=(); \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 dpkg --add-architecture "$architecture"; \
-                packages+=(libc6:"$architecture"=2.31-13); \
               done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
                 curl=7.74.0-1.3+b1 file=1:5.39-3 binutils=2.35.2-2 schroot=1.6.10-12 patchelf=0.12-1 \
                 procps=2:3.3.17-5 iproute2=5.10.0-4 libcap2-bin=1:2.44-1 \
                 dnsutils=1:9.16.15-1 iputils-ping=3:20210202-1 \
-                lynis=3.0.2-1 devscripts=2.21.3; \
-              apt-get install -qq --no-install-recommends \
-                "${packages[@]}"; \
+                lynis=3.0.2-1 devscripts=2.21.3+deb11u1; \
+              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                apt-get install -qq --no-install-recommends \
+                  libc6:"$architecture"=2.31-13+deb11u2; \
+              done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-10-01@sha256:a7606a62eb3333b41d8592c551de866b55ecc7bdee5b05bd0e9ca0ab356da83d
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-10-15@sha256:458b490df863df7f395d35de46abf2f8c86cde3239c513a7ab3f28817f8ac1c6
 
 #######################
 # Actual "builder" image
@@ -31,10 +31,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
-              packages=(); \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 dpkg --add-architecture "$architecture"; \
-                packages+=(crossbuild-essential-"$architecture"=12.9 musl-dev:"$architecture"=1.2.2-1 musl:"$architecture"=1.2.2-1 libc6:"$architecture"=2.31-13 libc6-dev:"$architecture"=2.31-13); \
               done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
@@ -47,8 +45,14 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 curl=7.74.0-1.3+b1 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
-              apt-get install -qq --no-install-recommends \
-                "${packages[@]}"; \
+              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                apt-get install -qq --no-install-recommends \
+                  crossbuild-essential-"$architecture"=12.9 \
+                  musl-dev:"$architecture"=1.2.2-1 \
+                  musl:"$architecture"=1.2.2-1 \
+                  libc6:"$architecture"=2.31-13+deb11u2 \
+                  libc6-dev:"$architecture"=2.31-13+deb11u2; \
+              done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \
@@ -62,7 +66,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.16.8
+ENV           GOLANG_VERSION=1.16.9
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -146,7 +150,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=14.18.0
+ENV           NODE_VERSION=14.18.1
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -205,7 +209,7 @@ ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-ENV           GOLANG_VERSION=1.16.8
+ENV           GOLANG_VERSION=1.16.9
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

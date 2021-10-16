@@ -5,14 +5,14 @@ Provides base images (builder, auditor, golang, node, runtime) used by all our i
 Currently, on linux amd64, 386, arm64, arm/v7, arm/v6, s390x, ppc64le:
 
 * `ghcr.io/dubo-dubon-duponey/base:runtime-latest` and `ghcr.io/dubo-dubon-duponey/base:runtime-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-10-01`)
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-10-15`)
   * labels
   * ca-certificates copied over
   * ONBUILD instructions to copy over runtime folders
   * user creation
   * entrypoint definition
 * `ghcr.io/dubo-dubon-duponey/base:builder-latest` and `ghcr.io/dubo-dubon-duponey/base:builder-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-10-01`)
+  * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-10-15`)
   * golang, python, and essential cross compilation dev & build tools
 * `ghcr.io/dubo-dubon-duponey/base:node-latest` and `ghcr.io/dubo-dubon-duponey/base:node-$SUITE-$DATE`
   * +nodejs +yarnpkg

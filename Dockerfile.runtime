@@ -160,7 +160,7 @@ ENV           GNUTLS_FORCE_FIPS_MODE=1
 # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 ENV           XDG_DATA_HOME=/data
 ENV           XDG_DATA_DIRS=/data
-ENV           XDG_CONFIG_HOME=/config
+ENV           XDG_CONFIG_HOME=/tmp/config
 ENV           XDG_CONFIG_DIRS=/config
 ENV           XDG_RUNTIME_DIR=/tmp/runtime
 ENV           XDG_STATE_HOME=/tmp/state

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2021-10-15@sha256:acf4260f850e11b617ffdb44810487973af567bbff74cfe5d1756f140254576e
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2021-11-01@sha256:273567cc10e0d263212ad99a7da2c8267daa70c476024cc9d4ffdf94f47022a5
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs

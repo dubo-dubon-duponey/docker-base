@@ -23,7 +23,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                ca-certificates=20210119
+                ca-certificates=20210119 \
+                bash-static=5.1-2+b3
 
 RUN           update-ca-certificates
 
@@ -31,7 +32,9 @@ RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
 
-RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
+RUN           mkdir -p /boot/bin; cp /bin/bash-static /boot/bin/bash
+
+RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates /boot/bin
 
 ########################################################################################################################
 # Export of the above

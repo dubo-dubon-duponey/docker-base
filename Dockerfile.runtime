@@ -23,16 +23,13 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                ca-certificates=20210119 \
-                bash-static=5.1-2+b3
+                ca-certificates=20210119
 
 RUN           update-ca-certificates
 
 RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
-
-RUN           mkdir -p /boot/bin; cp /bin/bash-static /boot/bin/bash
 
 RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates /boot/bin
 
@@ -54,6 +51,24 @@ COPY          --from=overlay-builder /overlay.tar /overlay.tar
 # - automatic entrypoint definition and user setting
 #######################
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS runtime
+
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends bash-static=5.1-2+b3 && \
+              mkdir -p /boot/bin && \
+              cp /bin/bash-static /boot/bin/bash && \
+              apt-get -qq purge bash-static && \
+              apt-get -qq autoremove      && \
+              apt-get -qq clean           && \
+              rm -rf /var/lib/apt/lists/* && \
+              rm -rf /tmp/*               && \
+              rm -rf /var/tmp/*
 
 # We use this to set mtime on newly created folders
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"

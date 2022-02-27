@@ -42,7 +42,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 libtool=2.4.6-15 \
 		            pkg-config=0.29.2-1 \
                 jq=1.6-2.1 \
-                curl=7.74.0-1.3+b1 \
+                curl=7.74.0-1.3+deb11u1 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
@@ -150,7 +150,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=14.18.1
+ENV           NODE_VERSION=14.19.0
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -249,7 +249,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+b1 \
+                curl=7.74.0-1.3+deb11u1 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               apt-get -qq autoremove; \

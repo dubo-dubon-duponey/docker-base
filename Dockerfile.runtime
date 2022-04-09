@@ -31,7 +31,7 @@ RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /etc/ssl/certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
               find /usr/share/ca-certificates -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
 
-RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates /boot/bin
+RUN           tar -cf /overlay.tar /etc/ssl/certs /usr/share/ca-certificates
 
 ########################################################################################################################
 # Export of the above

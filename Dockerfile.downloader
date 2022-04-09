@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-01-01@sha256:6a79de0a961cc825a88cbaca27de2ed4277bf6a1bcf30ce645c59d0927204379
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-04-01@sha256:eb89aeccb5828d0bec68d3b67f56f47c6d919ceaacff2096b81b48d49a914350
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
@@ -43,8 +43,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-cache show curl gnupg dirmngr ca-certificates; \
               apt-get install -qq --no-install-recommends \
                 curl=7.74.0-1.3+deb11u1 \
-                gnupg=2.2.27-2 \
-                dirmngr=2.2.27-2 \
+                gnupg=2.2.27-2+deb11u1 \
+                dirmngr=2.2.27-2+deb11u1 \
                 ca-certificates=20210119
 
 COPY          ./scripts /scripts

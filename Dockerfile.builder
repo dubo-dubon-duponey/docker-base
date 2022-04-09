@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-01-01@sha256:6a79de0a961cc825a88cbaca27de2ed4277bf6a1bcf30ce645c59d0927204379
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-04-01@sha256:eb89aeccb5828d0bec68d3b67f56f47c6d919ceaacff2096b81b48d49a914350
 
 #######################
 # Actual "builder" image
@@ -50,8 +50,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.2-1 \
                   musl:"$architecture"=1.2.2-1 \
-                  libc6:"$architecture"=2.31-13+deb11u2 \
-                  libc6-dev:"$architecture"=2.31-13+deb11u2; \
+                  libc6:"$architecture"=2.31-13+deb11u3 \
+                  libc6-dev:"$architecture"=2.31-13+deb11u3; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-01-01@sha256:6a79de0a961cc825a88cbaca27de2ed4277bf6a1bcf30ce645c59d0927204379
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-04-01@sha256:eb89aeccb5828d0bec68d3b67f56f47c6d919ceaacff2096b81b48d49a914350
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor
@@ -23,7 +23,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 lynis=3.0.2-1 devscripts=2.21.3+deb11u1; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 apt-get install -qq --no-install-recommends \
-                  libc6:"$architecture"=2.31-13+deb11u2; \
+                  libc6:"$architecture"=2.31-13+deb11u3; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

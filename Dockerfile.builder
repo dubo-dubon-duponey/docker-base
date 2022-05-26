@@ -151,7 +151,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=14.19.3
+ENV           NODE_VERSION=16.15.0
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt

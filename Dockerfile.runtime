@@ -1,6 +1,6 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-05-01@sha256:4da4df1c0a69fd1faf929df7c7956415803524831d3e770a969d475d496d78bc
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-05-01@sha256:4da4df1c0a69fd1faf929df7c7956415803524831d3e770a969d475d496d78bc
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-06-01@sha256:0f4f51555f4c320809bf842095d703c0c9918127eb33a5cc1a34ebea304bb4d6
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-06-01@sha256:0f4f51555f4c320809bf842095d703c0c9918127eb33a5cc1a34ebea304bb4d6
 
 #######################
 # Overlay

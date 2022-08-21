@@ -4,21 +4,21 @@ Provides base images (builder, auditor, golang, node, runtime) used by all our i
 
 Currently, on linux amd64, 386, arm64, arm/v7, arm/v6, s390x, ppc64le:
 
-* `ghcr.io/dubo-dubon-duponey/base:runtime-latest` and `ghcr.io/dubo-dubon-duponey/base:runtime-$SUITE-$DATE`
+* `index.docker.io/dubodubonduponey/base:runtime-latest` and `index.docker.io/dubodubonduponey/base:runtime-$SUITE-$DATE`
   * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-11-01`)
   * labels
   * ca-certificates copied over
   * ONBUILD instructions to copy over runtime folders
   * user creation
   * entrypoint definition
-* `ghcr.io/dubo-dubon-duponey/base:builder-latest` and `ghcr.io/dubo-dubon-duponey/base:builder-$SUITE-$DATE`
+* `index.docker.io/dubodubonduponey/base:builder-latest` and `index.docker.io/dubodubonduponey/base:builder-$SUITE-$DATE`
   * based on our debootstrapped version of Debian Bullseye (currently `DATE=2021-11-01`)
   * golang, python, and essential cross compilation dev & build tools
-* `ghcr.io/dubo-dubon-duponey/base:node-latest` and `ghcr.io/dubo-dubon-duponey/base:node-$SUITE-$DATE`
+* `index.docker.io/dubodubonduponey/base:node-latest` and `index.docker.io/dubodubonduponey/base:node-$SUITE-$DATE`
   * +nodejs +yarnpkg
-* `ghcr.io/dubo-dubon-duponey/base:golang-latest` and `ghcr.io/dubo-dubon-duponey/base:golang-$SUITE-$DATE`
+* `index.docker.io/dubodubonduponey/base:golang-latest` and `index.docker.io/dubodubonduponey/base:golang-$SUITE-$DATE`
   * just golang and git
-* `ghcr.io/dubo-dubon-duponey/base:auditor-latest` and `ghcr.io/dubo-dubon-duponey/base:auditor-$SUITE-$DATE`
+* `index.docker.io/dubodubonduponey/base:auditor-latest` and `index.docker.io/dubodubonduponey/base:auditor-$SUITE-$DATE`
   * test and security hardening tools
 
 ## TL;DR
@@ -44,7 +44,7 @@ export BUILDKIT_HOST=$(./hack/helpers/start-buildkit.sh 2>/dev/null)
 ./hack/build.sh auditor
 ```
 
-Note that the above will by default try to push to `ghcr.io/dubo-dubon-duponey/base`.
+Note that the above will by default try to push to `index.docker.io/dubodubonduponey/base`.
 Edit `recipe.cue`, or better, use an `env.cue` file (see [advanced](ADVANCED.md) for that) to control
 the push destination.
 

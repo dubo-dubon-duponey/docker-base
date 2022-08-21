@@ -1,6 +1,6 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-06-01@sha256:0f4f51555f4c320809bf842095d703c0c9918127eb33a5cc1a34ebea304bb4d6
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-06-01@sha256:0f4f51555f4c320809bf842095d703c0c9918127eb33a5cc1a34ebea304bb4d6
+ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-08-01
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-08-01
 
 #######################
 # Overlay
@@ -60,7 +60,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
-              apt-get install -qq --no-install-recommends bash-static=5.1-2+b3 && \
+              apt-get install -qq --no-install-recommends bash-static=5.1-2+deb11u1 && \
               mkdir -p /boot/bin && \
               cp /bin/bash-static /boot/bin/bash && \
               apt-get -qq purge bash-static && \

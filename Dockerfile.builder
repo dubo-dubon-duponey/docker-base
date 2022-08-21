@@ -1,5 +1,5 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-06-01@sha256:0f4f51555f4c320809bf842095d703c0c9918127eb33a5cc1a34ebea304bb4d6
+ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-08-01
 
 #######################
 # Actual "builder" image
@@ -66,7 +66,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION 1.17.11
+ENV           GOLANG_VERSION 1.17.13
 #ENV           GOLANG_VERSION=1.16.15
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
@@ -151,7 +151,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=16.15.1
+ENV           NODE_VERSION=16.17.0
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -211,7 +211,7 @@ ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 #ENV           GOLANG_VERSION=1.16.15
-ENV           GOLANG_VERSION 1.17.11
+ENV           GOLANG_VERSION 1.17.13
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

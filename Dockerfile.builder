@@ -35,18 +35,18 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 dpkg --add-architecture "$architecture"; \
               done; \
               apt-get update -qq; \
-              apt-get install -qq --no-install-recommends \
+              apt-get install -y --no-install-recommends \
                 build-essential=12.9 \
                 autoconf=2.69-14 \
                 automake=1:1.16.3-2 \
                 libtool=2.4.6-15 \
 		            pkg-config=0.29.2-1 \
                 jq=1.6-2.1 \
-                curl=7.74.0-1.3+deb11u1 \
+                curl=7.74.0-1.3+deb11u2 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
-                apt-get install -qq --no-install-recommends \
+                apt-get install -y --no-install-recommends \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.2-1 \
                   musl:"$architecture"=1.2.2-1 \

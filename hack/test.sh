@@ -7,7 +7,7 @@ readonly root
 
 # XXX right now this is not testing much but the runtime image building
 if ! "$root/hack/build.sh" \
-    --inject registry="index.docker.io/dubodubonduponey" \
+    --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
 	  --inject date=2021-11-01 \
 	  --inject suite=bullseye \
@@ -18,7 +18,7 @@ if ! "$root/hack/build.sh" \
 fi
 
 if ! "$root/hack/build.sh" \
-    --inject registry="index.docker.io/dubodubonduponey" \
+    --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
 	  --inject date=2021-11-01 \
 	  --inject suite=bullseye \

@@ -1,5 +1,5 @@
-ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-08-01
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-09-01
 
 #######################
 # Actual "builder" image

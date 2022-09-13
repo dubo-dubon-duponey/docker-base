@@ -251,7 +251,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+deb11u1 \
+                curl=7.74.0-1.3+deb11u2 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               apt-get -qq autoremove; \

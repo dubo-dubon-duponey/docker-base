@@ -49,9 +49,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
-              apt-cache show curl gnupg dirmngr ca-certificates; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+deb11u1 \
+                curl=7.74.0-1.3+deb11u2 \
                 gnupg=2.2.27-2+deb11u2 \
                 dirmngr=2.2.27-2+deb11u2 \
                 ca-certificates=20210119

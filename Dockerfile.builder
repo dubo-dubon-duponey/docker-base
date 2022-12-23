@@ -42,7 +42,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 libtool=2.4.6-15 \
 		            pkg-config=0.29.2-1 \
                 jq=1.6-2.1 \
-                curl=7.74.0-1.3+deb11u2 \
+                curl=7.74.0-1.3+deb11u3 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
@@ -50,8 +50,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.2-1 \
                   musl:"$architecture"=1.2.2-1 \
-                  libc6:"$architecture"=2.31-13+deb11u4 \
-                  libc6-dev:"$architecture"=2.31-13+deb11u4; \
+                  libc6:"$architecture"=2.31-13+deb11u5 \
+                  libc6-dev:"$architecture"=2.31-13+deb11u5; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
@@ -251,7 +251,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+deb11u2 \
+                curl=7.74.0-1.3+deb11u3 \
                 ca-certificates=20210119 \
                 git=1:2.30.2-1; \
               apt-get -qq autoremove; \

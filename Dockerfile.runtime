@@ -1,6 +1,6 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-09-01
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-09-01
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-12-01
+ARG           FROM_IMAGE_BUILDER=debian:bullseye-2022-12-01
 
 #######################
 # Overlay

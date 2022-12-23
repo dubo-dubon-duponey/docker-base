@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-09-01
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-12-01
 
 #######################
 # Actual "builder" image
@@ -50,8 +50,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.2-1 \
                   musl:"$architecture"=1.2.2-1 \
-                  libc6:"$architecture"=2.31-13+deb11u3 \
-                  libc6-dev:"$architecture"=2.31-13+deb11u3; \
+                  libc6:"$architecture"=2.31-13+deb11u4 \
+                  libc6-dev:"$architecture"=2.31-13+deb11u4; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
@@ -67,7 +67,7 @@ RUN           git config --global advice.detachedHead false
 # ADD           ./cache/overlay.tar /
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.6
+ENV           GOLANG_VERSION=1.18.9
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -151,7 +151,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=16.17.0
+ENV           NODE_VERSION=16.19.0
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -211,7 +211,7 @@ ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.6
+ENV           GOLANG_VERSION=1.18.9
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

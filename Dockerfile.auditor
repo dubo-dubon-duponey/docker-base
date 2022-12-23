@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-09-01
+ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-12-01
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor
@@ -23,7 +23,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 lynis=3.0.2-1 devscripts=2.21.3+deb11u1; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 apt-get install -qq --no-install-recommends \
-                  libc6:"$architecture"=2.31-13+deb11u3; \
+                  libc6:"$architecture"=2.31-13+deb11u4; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

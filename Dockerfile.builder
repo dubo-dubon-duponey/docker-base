@@ -67,7 +67,7 @@ RUN           git config --global advice.detachedHead false
 # ADD           ./cache/overlay.tar /
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.9
+ENV           GOLANG_VERSION=1.18.10
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -211,7 +211,7 @@ ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.9
+ENV           GOLANG_VERSION=1.18.10
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

@@ -254,7 +254,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get install -qq --no-install-recommends \
                 curl=7.88.1-10+deb12u1 \
                 ca-certificates=20230311 \
-                git=1:2.30.2-1; \
+                git=1:2.39.2-1.1; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \

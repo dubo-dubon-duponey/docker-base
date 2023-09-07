@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-12-01
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-01
 
 #######################
 # Actual "builder" image
@@ -31,27 +31,28 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
-              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+              for architecture in arm64 amd64; do \
                 dpkg --add-architecture "$architecture"; \
               done; \
               apt-get update -qq; \
+              echo done; \
               apt-get install -y --no-install-recommends \
                 build-essential=12.9 \
-                autoconf=2.69-14 \
-                automake=1:1.16.3-2 \
-                libtool=2.4.6-15 \
-		            pkg-config=0.29.2-1 \
+                autoconf=2.71-3 \
+                automake=1:1.16.5-1.3 \
+                libtool=2.4.7-5 \
+		            pkg-config=1.8.1-1 \
                 jq=1.6-2.1 \
-                curl=7.74.0-1.3+deb11u3 \
-                ca-certificates=20210119 \
-                git=1:2.30.2-1; \
-              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                curl=7.88.1-10+deb12u1 \
+                ca-certificates=20230311 \
+                git=1:2.39.2-1.1; \
+              for architecture in arm64 amd64; do \
                 apt-get install -y --no-install-recommends \
                   crossbuild-essential-"$architecture"=12.9 \
-                  musl-dev:"$architecture"=1.2.2-1 \
-                  musl:"$architecture"=1.2.2-1 \
-                  libc6:"$architecture"=2.31-13+deb11u5 \
-                  libc6-dev:"$architecture"=2.31-13+deb11u5; \
+                  musl-dev:"$architecture"=1.2.3-1 \
+                  musl:"$architecture"=1.2.3-1 \
+                  libc6:"$architecture"=2.36-9+deb12u1 \
+                  libc6-dev:"$architecture"=2.36-9+deb12u1; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
@@ -67,7 +68,7 @@ RUN           git config --global advice.detachedHead false
 # ADD           ./cache/overlay.tar /
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.10
+ENV           GOLANG_VERSION=1.20.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -151,7 +152,7 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=16.19.0
+ENV           NODE_VERSION=16.20.2
 ENV           YARN_VERSION=1.22.5
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -211,7 +212,7 @@ ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 #ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.18.10
+ENV           GOLANG_VERSION=1.20.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -251,8 +252,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+deb11u3 \
-                ca-certificates=20210119 \
+                curl=7.88.1-10+deb12u1 \
+                ca-certificates=20230311 \
                 git=1:2.30.2-1; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2022-12-01
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-01
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor
@@ -12,18 +12,18 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
-              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+              for architecture in arm64 amd64; do \
                 dpkg --add-architecture "$architecture"; \
               done; \
               apt-get update -qq; \
               apt-get install -y --no-install-recommends \
-                curl=7.74.0-1.3+deb11u3 file=1:5.39-3 binutils=2.35.2-2 schroot=1.6.10-12+deb11u1 patchelf=0.12-1 \
-                procps=2:3.3.17-5 iproute2=5.10.0-4 libcap2-bin=1:2.44-1 \
-                dnsutils=1:9.16.33-1~deb11u1 iputils-ping=3:20210202-1 \
-                lynis=3.0.2-1 devscripts=2.21.3+deb11u1; \
-              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+                curl=7.88.1-10+deb12u1 file=1:5.44-3 binutils=2.40-2 schroot=1.6.13-3+b2 patchelf=0.14.3-1+b1 \
+                procps=2:4.0.2-3 iproute2=6.1.0-3 libcap2-bin=1:2.66-4 \
+                dnsutils=1:9.18.16-1~deb12u1 iputils-ping=3:20221126-1 \
+                lynis=3.0.8-1.1 devscripts=2.23.4; \
+              for architecture in arm64 amd64; do \
                 apt-get install -qq --no-install-recommends \
-                  libc6:"$architecture"=2.31-13+deb11u5; \
+                  libc6:"$architecture"=2.36-9+deb12u1; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

@@ -19,8 +19,8 @@ init::golang(){
 }
 
 platforms::golang() {
-  printf "linux/amd64 linux/arm64"
-  # linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
+  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  # linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
 }
 
 checksum::golang() {
@@ -119,8 +119,8 @@ init::node() {
 }
 
 platforms::node() {
-  printf "linux/amd64 linux/arm64"
-  # linux/arm/v7 linux/ppc64le linux/s390x" # linux/arm/v6
+  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  #  linux/ppc64le linux/s390x" # linux/arm/v6
 }
 
 url::node() {
@@ -208,8 +208,8 @@ init::yarn() {
 }
 
 platforms::yarn() {
-  printf "linux/amd64 linux/arm64"
-  # linux/arm/v7 linux/arm/v6 linux/ppc64le linux/s390x"
+  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  # linux/arm/v6 linux/ppc64le linux/s390x"
 }
 
 url::yarn() {

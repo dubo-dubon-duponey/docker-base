@@ -73,8 +73,8 @@ cakes: {
 				platforms: types.#Platforms | * [
 					types.#Platforms.#AMD64,
 					types.#Platforms.#ARM64,
+					types.#Platforms.#V7,
 					// types.#Platforms.#I386,
-					// types.#Platforms.#V7,
 					// types.#Platforms.#V6,
 					// types.#Platforms.#S390X,
 					// types.#Platforms.#PPC64LE,
@@ -105,7 +105,7 @@ cakes: {
 				platforms: types.#Platforms | * [
 					types.#Platforms.#AMD64,
 					types.#Platforms.#ARM64,
-					// types.#Platforms.#V7,
+					types.#Platforms.#V7,
 					// types.#Platforms.#S390X,
 					// types.#Platforms.#PPC64LE,
 				]
@@ -135,8 +135,8 @@ cakes: {
 				platforms: types.#Platforms | * [
 					types.#Platforms.#AMD64,
 					types.#Platforms.#ARM64,
+					types.#Platforms.#V7,
 					// types.#Platforms.#I386,
-					// types.#Platforms.#V7,
 					// types.#Platforms.#V6,
 					// types.#Platforms.#S390X,
 					// types.#Platforms.#PPC64LE,
@@ -167,8 +167,8 @@ cakes: {
 				platforms: types.#Platforms | * [
 					types.#Platforms.#AMD64,
 					types.#Platforms.#ARM64,
+					types.#Platforms.#V7,
 					// types.#Platforms.#I386,
-					// types.#Platforms.#V7,
 					// types.#Platforms.#V6,
 					// types.#Platforms.#S390X,
 					// types.#Platforms.#PPC64LE,

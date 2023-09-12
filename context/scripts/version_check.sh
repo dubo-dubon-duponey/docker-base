@@ -40,8 +40,8 @@ check::golang() {
   if ! newversion=$(version::latest::patch url::golang "$version" "linux/amd64"); then
     logger::error "There is a more recent patch for the version of golang you want. You must update:"
 
-    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64"
-    # "linux/arm/v7" "linux/arm/v6" "linux/386" "linux/s390x" "linux/ppc64le"
+    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7"
+    # "linux/arm/v6" "linux/386" "linux/s390x" "linux/ppc64le"
 
     [ ! "$FAIL_WHEN_OUTDATED" ] || {
       logger::error "We will stop now - if you really want to NOT update though and build with that, set the build argument 'FAIL_WHEN_OUTDATED='";
@@ -54,7 +54,8 @@ check::golang() {
     ! newversion=$(version::latest::patch url::golang "$newversion" "linux/amd64")
     logger::warning "Although you are running a fully patched version of golang ($version), there is a new minor version that you should migrate to:"
 
-    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7" "linux/arm/v6"
+    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7"
+    # "linux/arm/v6"
   fi
 }
 

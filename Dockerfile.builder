@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-01
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-08
 
 #######################
 # Actual "builder" image

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_BUILDER=debian:bookworm-2023-09-01
+ARG           FROM_IMAGE_BUILDER=debian:bookworm-2023-09-08
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
@@ -39,6 +39,7 @@ ENV           YARN_VERSION=1.22.5
 ENV           GOLANG_VERSION 1.20.8
 ENV           GOLANG_LINUX_AMD64_SHA512 25fca289e35b09120935389e56733b3f6e849a98f819228708e6ca6202df0f07542dfc82b8447d959e9a2fc1fee27742f4ab397229c6cb883d7a2280e6176f38
 ENV           GOLANG_LINUX_ARM64_SHA512 d77c5139c49c644389876f64ebc58ae2f0eb87e5eca7d98edbb948160e78e2930a340ad350ed53738037f25f6986fd70ffb49097984ec26a8991ef5881b35c4a
+ENV           GOLANG_LINUX_ARM_V7_SHA512 bc30043d5d781891bb08af9d8fcd32a6279cd654fb287a21cb4d57086dafc46ebae78486826ffe0d94b8aa974bd0004408c93f4530288b7c3267bc7950ef52c1
 
 ENV           FAIL_WHEN_OUTDATED=true
 

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_BUILDER=debian:bookworm-2023-09-08
+ARG           FROM_IMAGE_BUILDER=debian:bookworm-2024-02-20
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
@@ -8,8 +8,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ENV           NODE_VERSION=16.20.2
-ENV           YARN_VERSION=1.22.5
+ENV           NODE_VERSION=20.11.1
+ENV           YARN_VERSION=1.22.21
 
 #ENV           GOLANG_VERSION 1.17.13
 #ENV           GOLANG_LINUX_AMD64_SHA512 672ce66bd7f1400b66d367f1026f3d7062201a8d686b4c1813ccade597ebbe89f9bd98130badd1d7bc6f2cf4020d63a4e71323b44a96fad842d5766ca92aa822
@@ -36,7 +36,7 @@ ENV           YARN_VERSION=1.22.5
 #14 9.211 ENV           GOLANG_LINUX_ARM_V7_SHA512 8747e9473495622f93ec735557eaaac3200817406b2f087bd46989df576806900314a5352443f16a686b2b5fcd8fc313403decbed04c2eca6cd89a80786ea644
 #14 10.77 ENV           GOLANG_LINUX_ARM_V6_SHA512 8747e9473495622f93ec735557eaaac3200817406b2f087bd46989df576806900314a5352443f16a686b2b5fcd8fc313403decbed04c2eca6cd89a80786ea644
 
-ENV           GOLANG_VERSION 1.20.8
+ENV           GOLANG_VERSION 1.21.7
 ENV           GOLANG_LINUX_AMD64_SHA512 25fca289e35b09120935389e56733b3f6e849a98f819228708e6ca6202df0f07542dfc82b8447d959e9a2fc1fee27742f4ab397229c6cb883d7a2280e6176f38
 ENV           GOLANG_LINUX_ARM64_SHA512 d77c5139c49c644389876f64ebc58ae2f0eb87e5eca7d98edbb948160e78e2930a340ad350ed53738037f25f6986fd70ffb49097984ec26a8991ef5881b35c4a
 ENV           GOLANG_LINUX_ARM_V7_SHA512 bc30043d5d781891bb08af9d8fcd32a6279cd654fb287a21cb4d57086dafc46ebae78486826ffe0d94b8aa974bd0004408c93f4530288b7c3267bc7950ef52c1
@@ -53,7 +53,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -y --no-install-recommends \
-                curl=7.88.1-10+deb12u1 \
+                curl=7.88.1-10+deb12u5 \
                 gnupg=2.2.40-1.1 \
                 dirmngr=2.2.40-1.1 \
                 ca-certificates=20230311

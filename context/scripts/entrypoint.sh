@@ -230,7 +230,11 @@ checksum::yarn() {
 
   cache::download "$arch" "yarn-$version.asc" "https://yarnpkg.com/downloads/$version/yarn-v$version.tar.gz.asc"
   logger::debug "Verifying Yarn signature"
-  gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
+  # XXX RED ALERT - Yarn is currently broken and has been for a while now
+  # It is pretty clear they dont maintain it anymore
+  # See first warning here from last November
+  # https://github.com/yarnpkg/yarn/releases/tag/v1.22.20
+  # gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
 }
 
 

@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-08
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-02-20
 
 # XXX a new experimental image meant for auditing shit
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS auditor
@@ -17,9 +17,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               done; \
               apt-get update -qq; \
               apt-get install -y --no-install-recommends \
-                curl=7.88.1-10+deb12u1 file=1:5.44-3 binutils=2.40-2 schroot=1.6.13-3+b2 patchelf=0.14.3-1+b1 \
+                curl=7.88.1-10+deb12u5 file=1:5.44-3 binutils=2.40-2 schroot=1.6.13-3+b2 patchelf=0.14.3-1+b1 \
                 procps=2:4.0.2-3 iproute2=6.1.0-3 libcap2-bin=1:2.66-4 \
-                dnsutils=1:9.18.16-1~deb12u1 iputils-ping=3:20221126-1 \
+                dnsutils=1:9.18.24-1 iputils-ping=3:20221126-1 \
                 lynis=3.0.8-1.1 devscripts=2.23.4; \
               for architecture in arm64 amd64; do \
                 apt-get install -qq --no-install-recommends \

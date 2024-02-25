@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2023-09-08
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-02-20
 
 #######################
 # Actual "builder" image
@@ -43,7 +43,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 libtool=2.4.7-5 \
 		            pkg-config=1.8.1-1 \
                 jq=1.6-2.1 \
-                curl=7.88.1-10+deb12u1 \
+                curl=7.88.1-10+deb12u5 \
                 ca-certificates=20230311 \
                 git=1:2.39.2-1.1; \
               for architecture in arm64 amd64; do \
@@ -152,8 +152,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=16.20.2
-ENV           YARN_VERSION=1.22.5
+ENV           NODE_VERSION=20.11.1
+ENV           YARN_VERSION=1.22.21
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
@@ -252,7 +252,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.88.1-10+deb12u1 \
+                curl=7.88.1-10+deb12u5 \
                 ca-certificates=20230311 \
                 git=1:2.39.2-1.1; \
               apt-get -qq autoremove; \

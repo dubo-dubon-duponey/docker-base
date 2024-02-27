@@ -20,7 +20,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 curl=7.88.1-10+deb12u5 file=1:5.44-3 binutils=2.40-2 schroot=1.6.13-3+b2 patchelf=0.14.3-1+b1 \
                 procps=2:4.0.2-3 iproute2=6.1.0-3 libcap2-bin=1:2.66-4 \
                 dnsutils=1:9.18.24-1 iputils-ping=3:20221126-1 \
-                lynis=3.0.8-1.1 devscripts=2.23.4; \
+                lynis=3.0.8-1.1 devscripts=2.23.4+deb12u1; \
               for architecture in arm64 amd64; do \
                 apt-get install -qq --no-install-recommends \
                   libc6:"$architecture"=2.36-9+deb12u4; \

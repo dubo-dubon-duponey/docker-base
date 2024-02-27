@@ -23,7 +23,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 lynis=3.0.8-1.1 devscripts=2.23.4; \
               for architecture in arm64 amd64; do \
                 apt-get install -qq --no-install-recommends \
-                  libc6:"$architecture"=2.36-9+deb12u1; \
+                  libc6:"$architecture"=2.36-9+deb12u4; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

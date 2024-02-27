@@ -35,7 +35,6 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 dpkg --add-architecture "$architecture"; \
               done; \
               apt-get update -qq; \
-              echo done; \
               apt-get install -y --no-install-recommends \
                 build-essential=12.9 \
                 autoconf=2.71-3 \
@@ -51,8 +50,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.3-1 \
                   musl:"$architecture"=1.2.3-1 \
-                  libc6:"$architecture"=2.36-9+deb12u1 \
-                  libc6-dev:"$architecture"=2.36-9+deb12u1; \
+                  libc6:"$architecture"=2.36-9+deb12u4 \
+                  libc6-dev:"$architecture"=2.36-9+deb12u4; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \

@@ -19,7 +19,8 @@ init::golang(){
 }
 
 platforms::golang() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
+  printf "linux/amd64 linux/arm64" # linux/arm/v7"
+  # linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
 }
 
 checksum::golang() {
@@ -98,26 +99,28 @@ init::node() {
     local server
     # XXX Discarded servers: hkps://keys.gnupg.net hkps://pgp.mit.edu hkps://keyoxide.org hkps://keybase.io; do
     # hkps://keys.openpgp.org <- may work as well for some of them
-    for server in hkps://keyserver.ubuntu.com; do
-      >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
-      # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
-      # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
-      # gpg: key F13993A75599653C: new key but contains no user ID - skipped
-      # gpg: Total number processed: 1
-      # gpg:           w/o user IDs: 1
-      # Quite effed-up ^, gpg
-      gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
-      # && break || {
-      #  >&2 echo "No dice. Moving on to next server"
-      #  continue
-      #}
-    done
+    #for server in hkps://keyserver.ubuntu.com; do
+    server=hkps://keyserver.ubuntu.com
+    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+    # XXX gpg may return 0 but still NOT import the key if it has no user ID, so we HAVE to iterate over them all, for all keys
+    # root@af1c2517c790:/# gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B9E2F5981AA6E0CD28160D9FF13993A75599653C; echo $?
+    # gpg: key F13993A75599653C: new key but contains no user ID - skipped
+    # gpg: Total number processed: 1
+    # gpg:           w/o user IDs: 1
+    # Quite effed-up ^, gpg
+    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+    # && break || {
+    #  >&2 echo "No dice. Moving on to next server"
+    #  continue
+    #}
+    #done
     gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
   done
 }
 
 platforms::node() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/ppc64le linux/s390x" # linux/arm/v6
+  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  #  linux/ppc64le linux/s390x" # linux/arm/v6
 }
 
 url::node() {
@@ -196,15 +199,18 @@ init::yarn() {
   local key=6A010C5166006599AA17F08146C2130DFD2497F5
   logger::debug "Importing Yarn key $key"
   # hkps://keys.openpgp.org <- may work as well for some of them
-  for server in hkps://keyserver.ubuntu.com; do
-    >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
-    gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
-  done
+  #for server in hkps://keyserver.ubuntu.com; do
+  local server=hkps://keyserver.ubuntu.com
+  >&2 echo "gpg --batch --keyserver $server ${gpgopts[*]} --recv-keys $key"
+  gpg --batch --keyserver "$server" "${gpgopts[@]}" --recv-keys $key || true
+  #done
   gpg --list-keys --fingerprint --with-colon "$key" | sed -E -n -e 's/^fpr:::::::::([0-9A-F]+):$/\1:6:/p' | head -1 | gpg --import-ownertrust 2>/dev/null
 }
 
 platforms::yarn() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7 linux/arm/v6 linux/ppc64le linux/s390x"
+  printf "linux/amd64 linux/arm64
+  # linux/arm/v7"
+  # linux/arm/v6 linux/ppc64le linux/s390x"
 }
 
 url::yarn() {
@@ -225,7 +231,11 @@ checksum::yarn() {
 
   cache::download "$arch" "yarn-$version.asc" "https://yarnpkg.com/downloads/$version/yarn-v$version.tar.gz.asc"
   logger::debug "Verifying Yarn signature"
-  gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
+  # XXX RED ALERT - Yarn is currently broken and has been for a while now
+  # It is pretty clear they dont maintain it anymore
+  # See first warning here from last November
+  # https://github.com/yarnpkg/yarn/releases/tag/v1.22.20
+  # gpg --batch --verify "$(cache::path "$arch" "yarn-$version.asc")" "$(cache::path "$arch" "$binary")"
 }
 
 

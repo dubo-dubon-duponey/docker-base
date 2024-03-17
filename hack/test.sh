@@ -7,10 +7,10 @@ readonly root
 
 # XXX right now this is not testing much but the runtime image building
 if ! "$root/hack/build.sh" \
-    --inject registry="ghcr.io/dubo-dubon-duponey" \
+    --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
-	  --inject date=2021-08-01 \
-	  --inject suite=bullseye \
+	  --inject date=2024-03-01 \
+	  --inject suite=bookworm \
     --inject platforms=linux/amd64,linux/arm64 \
   	overlay "$@"; then
   printf >&2 "Failed building overlay\n"
@@ -18,10 +18,10 @@ if ! "$root/hack/build.sh" \
 fi
 
 if ! "$root/hack/build.sh" \
-    --inject registry="ghcr.io/dubo-dubon-duponey" \
+    --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
-	  --inject date=2021-08-01 \
-	  --inject suite=bullseye \
+	  --inject date=2024-03-01 \
+	  --inject suite=bookworm \
     --inject platforms=linux/amd64,linux/arm64 \
   	runtime "$@"; then
   printf >&2 "Failed building runtime image\n"

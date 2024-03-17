@@ -21,6 +21,10 @@ validate(){
   local failed=()
   local ignored=()
   local check
+  [ ! -d "$binary" ] || {
+    print "%s is a directory. Doing nothing" "$binary"
+    return
+  }
   for check in "${CHECKLIST[@]}"; do
     [ "${!check:-}" == true ] || { ignored+=("$check"); continue; }
     case "$check" in
@@ -46,7 +50,10 @@ validate(){
         [ ! "$(printf "%s" "$DYN")" ] && passed+=("$check") || failed+=("$check")
       ;;
       "RUNNING")
-        "$binary" "--version" >/dev/null 2>&1 || "$binary" version >/dev/null 2>&1  && passed+=("$check") || {
+        "$binary" "--version" >/dev/null 2>&1 \
+        || "$binary" version >/dev/null 2>&1  \
+        || "$binary" --help >/dev/null 2>&1 \
+        && passed+=("$check") || {
           failed+=("$check")
           >&2 printf "FAILING TO RUN BINARY. This is usually quite bad. Output was:\n"
           >&2 "$binary" "--version" || true

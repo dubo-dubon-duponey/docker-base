@@ -36,10 +36,12 @@ check::golang() {
 
   version="$(env::version::read "golang")"
 
+  # shellcheck disable=SC2251
   if ! newversion=$(version::latest::patch url::golang "$version" "linux/amd64"); then
     logger::error "There is a more recent patch for the version of golang you want. You must update:"
 
-    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7" "linux/arm/v6" "linux/386" "linux/s390x" "linux/ppc64le"
+    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7"
+    # "linux/arm/v6" "linux/386" "linux/s390x" "linux/ppc64le"
 
     [ ! "$FAIL_WHEN_OUTDATED" ] || {
       logger::error "We will stop now - if you really want to NOT update though and build with that, set the build argument 'FAIL_WHEN_OUTDATED='";
@@ -47,11 +49,13 @@ check::golang() {
     }
   fi
 
+  # shellcheck disable=SC2251
   if ! newversion=$(version::latest::minor url::golang "$version" "linux/amd64"); then
     ! newversion=$(version::latest::patch url::golang "$newversion" "linux/amd64")
     logger::warning "Although you are running a fully patched version of golang ($version), there is a new minor version that you should migrate to:"
 
-    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7" "linux/arm/v6"
+    version::latest::checksum "golang" "$newversion" "linux/amd64" "linux/arm64" "linux/arm/v7"
+    # "linux/arm/v6"
   fi
 }
 
@@ -60,6 +64,7 @@ check::node() {
 
   version="$(env::version::read "node")"
 
+  # shellcheck disable=SC2251
   if  ! newversion=$(version::latest::minor url::node "$version" "linux/amd64") || \
       ! newversion=$(version::latest::patch url::node "$version" "linux/amd64"); then
 
@@ -72,6 +77,7 @@ check::node() {
     }
   fi
 
+  # shellcheck disable=SC2251
   if ! newversion=$(version::latest::major url::node "$version" "linux/amd64" "evenonly"); then
     ! newversion=$(version::latest::minor url::node "$newversion" "linux/amd64")
     ! newversion=$(version::latest::patch url::node "$newversion" "linux/amd64")
@@ -83,6 +89,7 @@ check::yarn() {
   local version
 
   version="$(env::version::read "yarn")"
+  # shellcheck disable=SC2251
   if  ! newversion=$(version::latest::minor url::yarn "$version" "linux/amd64") || \
       ! newversion=$(version::latest::patch url::yarn "$version" "linux/amd64"); then
 
@@ -95,6 +102,7 @@ check::yarn() {
     }
   fi
 
+  # shellcheck disable=SC2251
   if ! newversion=$(version::latest::major url::yarn "$version"); then
     ! newversion=$(version::latest::minor url::yarn "$newversion")
     ! newversion=$(version::latest::patch url::yarn "$newversion")

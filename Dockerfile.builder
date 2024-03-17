@@ -1,5 +1,5 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
 
 #######################
 # Actual "builder" image
@@ -31,24 +31,28 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=NETRC \
               --mount=type=secret,id=APT_SOURCES \
               --mount=type=secret,id=APT_CONFIG \
-              packages=(); \
-              for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
+              for architecture in arm64 amd64; do \
                 dpkg --add-architecture "$architecture"; \
-                packages+=(crossbuild-essential-"$architecture"=12.9 musl-dev:"$architecture"=1.2.2-1 musl:"$architecture"=1.2.2-1 libc6:"$architecture"=2.31-13 libc6-dev:"$architecture"=2.31-13); \
               done; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
                 build-essential=12.9 \
-                autoconf=2.69-14 \
-                automake=1:1.16.3-2 \
-                libtool=2.4.6-15 \
-		            pkg-config=0.29.2-1 \
+                autoconf=2.71-3 \
+                automake=1:1.16.5-1.3 \
+                libtool=2.4.7-5 \
+		            pkg-config=1.8.1-1 \
                 jq=1.6-2.1 \
-                curl=7.74.0-1.3+b1 \
-                ca-certificates=20210119 \
-                git=1:2.30.2-1; \
-              apt-get install -qq --no-install-recommends \
-                "${packages[@]}"; \
+                curl=7.88.1-10+deb12u5 \
+                ca-certificates=20230311 \
+                git=1:2.39.2-1.1; \
+              for architecture in arm64 amd64; do \
+                apt-get install -qq --no-install-recommends \
+                  crossbuild-essential-"$architecture"=12.9 \
+                  musl-dev:"$architecture"=1.2.3-1 \
+                  musl:"$architecture"=1.2.3-1 \
+                  libc6:"$architecture"=2.36-9+deb12u4 \
+                  libc6-dev:"$architecture"=2.36-9+deb12u4; \
+              done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \
@@ -62,7 +66,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.16.7
+ENV           GOLANG_VERSION=1.21.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -146,8 +150,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=14.17.6
-ENV           YARN_VERSION=1.22.5
+ENV           NODE_VERSION=20.11.1
+ENV           YARN_VERSION=1.22.22
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
@@ -205,7 +209,7 @@ ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-ENV           GOLANG_VERSION=1.16.7
+ENV           GOLANG_VERSION=1.21.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -245,9 +249,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.74.0-1.3+b1 \
-                ca-certificates=20210119 \
-                git=1:2.30.2-1; \
+                curl=7.88.1-10+deb12u5 \
+                ca-certificates=20230311 \
+                git=1:2.39.2-1.1; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \

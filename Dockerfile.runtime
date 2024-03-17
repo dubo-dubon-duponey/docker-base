@@ -1,6 +1,6 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
-ARG           FROM_IMAGE_RUNTIME=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
-ARG           FROM_IMAGE_BUILDER=debian:bullseye-2021-09-01@sha256:7231d833660dd4fe1ec0aa4b4484cde1e538fe77b0b6871f8ea55197c56cf692
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
+ARG           FROM_IMAGE_BUILDER=debian:bookworm-2024-03-01
 
 #######################
 # Overlay
@@ -23,7 +23,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                ca-certificates=20210119
+                ca-certificates=20230311
 
 RUN           update-ca-certificates
 
@@ -51,6 +51,24 @@ COPY          --from=overlay-builder /overlay.tar /overlay.tar
 # - automatic entrypoint definition and user setting
 #######################
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS runtime
+
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends bash-static=5.2.15-2+b2 && \
+              mkdir -p /boot/bin && \
+              cp /bin/bash-static /boot/bin/bash && \
+              apt-get -qq purge bash-static && \
+              apt-get -qq autoremove      && \
+              apt-get -qq clean           && \
+              rm -rf /var/lib/apt/lists/* && \
+              rm -rf /tmp/*               && \
+              rm -rf /var/tmp/*
 
 # We use this to set mtime on newly created folders
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
@@ -154,4 +172,16 @@ ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
 # Finally downgrade to system user
 ONBUILD USER  dubo-dubon-duponey
 
-ENTRYPOINT  ["/boot/entrypoint.sh"]
+# Disable weak cryptography in GNUTLS
+ENV           GNUTLS_FORCE_FIPS_MODE=1
+
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+ENV           XDG_DATA_HOME=/data
+ENV           XDG_DATA_DIRS=/data
+ENV           XDG_CONFIG_HOME=/tmp/config
+ENV           XDG_CONFIG_DIRS=/config
+ENV           XDG_RUNTIME_DIR=/tmp/runtime
+ENV           XDG_STATE_HOME=/tmp/state
+ENV           XDG_CACHE_HOME=/tmp/cache
+
+ENTRYPOINT    ["/boot/entrypoint.sh"]

@@ -19,7 +19,7 @@ init::golang(){
 }
 
 platforms::golang() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  printf "linux/amd64 linux/arm64" # linux/arm/v7"
   # linux/arm/v6 linux/386 linux/ppc64le linux/s390x"
 }
 
@@ -208,7 +208,8 @@ init::yarn() {
 }
 
 platforms::yarn() {
-  printf "linux/amd64 linux/arm64 linux/arm/v7"
+  printf "linux/amd64 linux/arm64
+  # linux/arm/v7"
   # linux/arm/v6 linux/ppc64le linux/s390x"
 }
 

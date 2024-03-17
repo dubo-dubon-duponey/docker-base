@@ -2,7 +2,7 @@
 
 Provides base images (builder, auditor, golang, node, runtime) used by all our images.
 
-Currently, on linux amd64, 386, arm64, arm/v7, arm/v6, s390x, ppc64le:
+Currently, on linux amd64, arm64:
 
 * `docker.io/dubodubonduponey/base:runtime-latest` and `docker.io/dubodubonduponey/base:runtime-$SUITE-$DATE`
   * based on our debootstrapped version of Debian Bookworm (currently `DATE=2024-03-01`)
@@ -55,7 +55,7 @@ You can control additional aspects of the build passing arguments:
 ```bash
 # Control base image, target platforms, and cache
 ./hack/build.sh runtime \
-  --inject platforms="linux/arm/v6" \
+  --inject platforms="linux/arm64" \
   --inject registry="private.registry/yourname"
 ```
 

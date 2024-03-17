@@ -66,8 +66,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-#ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.21.7
+ENV           GOLANG_VERSION=1.21.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -152,7 +151,7 @@ ARG           TARGETPLATFORM
 
 # Add node
 ENV           NODE_VERSION=20.11.1
-ENV           YARN_VERSION=1.22.21
+ENV           YARN_VERSION=1.22.22
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
 ADD           ./cache/$TARGETPLATFORM/yarn-$YARN_VERSION.tar.gz /opt
@@ -210,8 +209,7 @@ ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-#ENV           GOLANG_VERSION 1.17.13
-ENV           GOLANG_VERSION=1.21.7
+ENV           GOLANG_VERSION=1.21.8
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 

@@ -9,8 +9,8 @@ readonly root
 if ! "$root/hack/build.sh" \
     --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
-	  --inject date=2022-12-01 \
-	  --inject suite=bullseye \
+	  --inject date=2024-03-01 \
+	  --inject suite=bookworm \
     --inject platforms=linux/amd64,linux/arm64 \
   	overlay "$@"; then
   printf >&2 "Failed building overlay\n"
@@ -20,8 +20,8 @@ fi
 if ! "$root/hack/build.sh" \
     --inject registry="docker.io/dubodubonduponey" \
     --inject progress=plain \
-	  --inject date=2022-12-01 \
-	  --inject suite=bullseye \
+	  --inject date=2024-03-01 \
+	  --inject suite=bookworm \
     --inject platforms=linux/amd64,linux/arm64 \
   	runtime "$@"; then
   printf >&2 "Failed building runtime image\n"

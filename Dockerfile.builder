@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-02-20
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
 
 #######################
 # Actual "builder" image
@@ -35,7 +35,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 dpkg --add-architecture "$architecture"; \
               done; \
               apt-get update -qq; \
-              apt-get install -y --no-install-recommends \
+              apt-get install -qq --no-install-recommends \
                 build-essential=12.9 \
                 autoconf=2.71-3 \
                 automake=1:1.16.5-1.3 \
@@ -46,7 +46,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 ca-certificates=20230311 \
                 git=1:2.39.2-1.1; \
               for architecture in arm64 amd64; do \
-                apt-get install -y --no-install-recommends \
+                apt-get install -qq --no-install-recommends \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.3-1 \
                   musl:"$architecture"=1.2.3-1 \

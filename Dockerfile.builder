@@ -2,9 +2,23 @@ ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
 
 #######################
+# Base
+#######################
+FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS base_for_builder
+
+# Note: these obviously cannot be changed at *runtime* in the runtime image. As soon as something relies on it to build, they are set...
+ENV           XDG_DATA_HOME=/data
+ENV           XDG_CONFIG_HOME=/tmp/config
+ENV           XDG_STATE_HOME=/tmp/state
+ENV           XDG_CACHE_HOME=/tmp/cache
+ENV           XDG_RUNTIME_DIR=/tmp/runtime
+ENV           XDG_DATA_DIRS=/data
+ENV           XDG_CONFIG_DIRS=/config
+
+#######################
 # Actual "builder" image
 #######################
-FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS builder
+FROM          base_for_builder                                                                                          AS builder
 
 # This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
@@ -40,7 +54,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 autoconf=2.71-3 \
                 automake=1:1.16.5-1.3 \
                 libtool=2.4.7-5 \
-		            pkg-config=1.8.1-1 \
+  	            pkg-config=1.8.1-1 \
                 jq=1.6-2.1 \
                 curl=7.88.1-10+deb12u5 \
                 ca-certificates=20230311 \
@@ -144,7 +158,7 @@ WORKDIR       /source
 #######################
 # Actual "builder" image (with node)
 #######################
-FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS builder-node
+FROM          base_for_builder                                                                                          AS builder-node
 
 # This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM
@@ -199,7 +213,7 @@ RUN           ln -s /opt/node-*/bin/* /usr/local/bin/; \
 #######################
 # Slim go image, solely for goproxy or as a lightweight go building without CGO
 #######################
-FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS builder-golang
+FROM          base_for_builder                                                                                          AS builder-golang
 
 # This is used to get the appropriate binaries from previous stages export
 ARG           TARGETPLATFORM

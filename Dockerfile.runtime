@@ -175,13 +175,58 @@ ONBUILD USER  dubo-dubon-duponey
 # Disable weak cryptography in GNUTLS
 ENV           GNUTLS_FORCE_FIPS_MODE=1
 
-# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+################################## https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+
+#### Primary, typically read-write
+
+## Main user data location (meant to be modified, persistent)
+
+# $XDG_DATA_HOME defines the base directory relative to which user-specific data files should be stored.
+# If $XDG_DATA_HOME is either not set or empty, a default equal to $HOME/.local/share should be used.
 ENV           XDG_DATA_HOME=/data
-ENV           XDG_DATA_DIRS=/data
+
+## Main user configuration location (meant to be modified, transient)
+
+# $XDG_CONFIG_HOME defines the base directory relative to which user-specific configuration files should be stored.
+# If $XDG_CONFIG_HOME is either not set or empty, a default equal to $HOME/.config should be used.
 ENV           XDG_CONFIG_HOME=/tmp/config
-ENV           XDG_CONFIG_DIRS=/config
-ENV           XDG_RUNTIME_DIR=/tmp/runtime
+
+## Main user state location (meant to be modified, transient)
+
+# $XDG_STATE_HOME defines the base directory relative to which user-specific state files should be stored.
+# If $XDG_STATE_HOME is either not set or empty, a default equal to $HOME/.local/state should be used.
+# The $XDG_STATE_HOME contains state data that should persist between (application) restarts,
+# but that is not important or portable enough to the user that it should be stored in $XDG_DATA_HOME. It may contain:
+# actions history (logs, history, recently used files, …)
+# current state of the application that can be reused on a restart (view, layout, open files, undo history, …)
 ENV           XDG_STATE_HOME=/tmp/state
+
+## Main user cache location (meant to be modified, transient)
+
+# $XDG_CACHE_HOME defines the base directory relative to which user-specific non-essential data files should be stored.
+# If $XDG_CACHE_HOME is either not set or empty, a default equal to $HOME/.cache should be used.
 ENV           XDG_CACHE_HOME=/tmp/cache
+
+## Main user runtime location (meant to be modified, session bound)
+
+# $XDG_RUNTIME_DIR defines the base directory relative to which user-specific non-essential runtime files and other file objects (such as sockets, named pipes, ...) should be stored.
+# The directory MUST be owned by the user, and he MUST be the only one having read and write access to it. Its Unix access mode MUST be 0700.
+ENV           XDG_RUNTIME_DIR=/tmp/runtime
+
+#### Secondary, typically read-only
+
+## Main data location (fixed, persistent)
+
+# $XDG_DATA_DIRS defines the preference-ordered set of base directories to search for data files in addition to the $XDG_DATA_HOME base directory.
+# The directories in $XDG_DATA_DIRS should be seperated with a colon ':'.
+# If $XDG_DATA_DIRS is either not set or empty, a value equal to /usr/local/share/:/usr/share/ should be used.
+ENV           XDG_DATA_DIRS=/data
+
+## Main config location (fixed, persistent)
+
+# $XDG_CONFIG_DIRS defines the preference-ordered set of base directories to search for configuration files in addition to the $XDG_CONFIG_HOME base directory.
+# The directories in $XDG_CONFIG_DIRS should be seperated with a colon ':'.
+# If $XDG_CONFIG_DIRS is either not set or empty, a value equal to /etc/xdg should be used.
+ENV           XDG_CONFIG_DIRS=/config
 
 ENTRYPOINT    ["/boot/entrypoint.sh"]

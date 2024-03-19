@@ -113,68 +113,6 @@ RUN           echo "umask 0700" > /etc/profile.d/dbdbdp; \
               epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               touch --no-dereference --date="@$epoch" /etc/profile.d/dbdbdp
 
-# Create a restricted user account (no shell, no home, disabled), and add our folders
-RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
-                --uid 2000 \
-                dubo-dubon-duponey; \
-              mkdir -p /boot; \
-              mkdir -p /config; \
-              mkdir -p /data; \
-              mkdir -p /certs; \
-              chown -R 2000:root /boot; \
-              chown -R 2000:root /config; \
-              chown -R 2000:root /data; \
-              chown -R 2000:root /certs; \
-              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
-              touch --no-dereference --date="@$epoch" /boot; \
-              touch --no-dereference --date="@$epoch" /config; \
-              touch --no-dereference --date="@$epoch" /data; \
-              touch --no-dereference --date="@$epoch" /certs;
-
-# Fix timestamp on files altered by user creation and ca-certificates to fix reproducibility
-# NOTE: this is somewhat problematic. BUILD_CREATED could be older than the Debian image it is using.
-# Burden is on the maintainer to avoid that
-RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
-              touch --no-dereference --date="@$epoch" /etc/shadow; \
-              touch --no-dereference --date="@$epoch" /etc/shadow-; \
-              touch --no-dereference --date="@$epoch" /etc/passwd; \
-              touch --no-dereference --date="@$epoch" /etc/passwd-; \
-              touch --no-dereference --date="@$epoch" /etc/subuid; \
-              touch --no-dereference --date="@$epoch" /etc/subgid
-
-# Get all relevant files at build time, from a "runtime" folder under context
-ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
-
-# Setup directories and permissions
-# The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
-# Write is granted, although that doesn't really matter in term of security
-ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
-                usermod -u "$BUILD_UID" dubo-dubon-duponey; \
-                chown -R $BUILD_UID:root /boot; \
-                chown -R $BUILD_UID:root /config; \
-                chown -R $BUILD_UID:root /data; \
-                chown -R $BUILD_UID:root /certs; \
-              }; \
-              find /boot   -type d -exec chmod -R 550 {} +; \
-              find /config -type d -exec chmod -R 550 {} +; \
-              find /data   -type d -exec chmod -R 770 {} +; \
-              find /certs  -type d -exec chmod -R 770 {} +; \
-              find /boot   -type f -exec chmod -R 550 {} +; \
-              find /config -type f -exec chmod -R 440 {} +; \
-              find /data   -type f -exec chmod -R 660 {} +; \
-              find /certs  -type f -exec chmod -R 660 {} +; \
-              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
-              find /boot -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /config -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /data -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
-
-# Finally downgrade to system user
-ONBUILD USER  dubo-dubon-duponey
-
-# Disable weak cryptography in GNUTLS
-ENV           GNUTLS_FORCE_FIPS_MODE=1
-
 ################################## https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
 #### Primary, typically read-write
@@ -228,5 +166,62 @@ ENV           XDG_DATA_DIRS=/data
 # The directories in $XDG_CONFIG_DIRS should be seperated with a colon ':'.
 # If $XDG_CONFIG_DIRS is either not set or empty, a value equal to /etc/xdg should be used.
 ENV           XDG_CONFIG_DIRS=/config
+
+# Create a restricted user account (no shell, no home, disabled), and add our folders
+RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
+                --uid 2000 \
+                dubo-dubon-duponey; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              for i in /boot /certs \
+                  "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME" \
+                  "$XDG_RUNTIME_DIR" "$XDG_DATA_DIRS" "$XDG_CONFIG_DIRS"; do \
+                mkdir -p "$i"; \
+                chown -R 2000:root "$i"; \
+                touch --no-dereference --date="@$epoch" "$i"; \
+              done
+
+# Fix timestamp on files altered by user creation and ca-certificates to fix reproducibility
+# NOTE: this is somewhat problematic. BUILD_CREATED could be older than the Debian image it is using.
+# Burden is on the maintainer to avoid that
+RUN           epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              touch --no-dereference --date="@$epoch" /etc/shadow; \
+              touch --no-dereference --date="@$epoch" /etc/shadow-; \
+              touch --no-dereference --date="@$epoch" /etc/passwd; \
+              touch --no-dereference --date="@$epoch" /etc/passwd-; \
+              touch --no-dereference --date="@$epoch" /etc/subuid; \
+              touch --no-dereference --date="@$epoch" /etc/subgid
+
+# Get all relevant files at build time, from a "runtime" folder under context
+ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
+
+# Setup directories and permissions
+# The user can access the files as the owner, and root can access as the group (that way, --user root still works without caps).
+# Write is granted, although that doesn't really matter in term of security
+ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
+                usermod -u "$BUILD_UID" dubo-dubon-duponey; \
+                chown -R $BUILD_UID:root /boot; \
+                chown -R $BUILD_UID:root /config; \
+                chown -R $BUILD_UID:root /data; \
+                chown -R $BUILD_UID:root /certs; \
+              }; \
+              find /boot   -type d -exec chmod -R 550 {} +; \
+              find /config -type d -exec chmod -R 550 {} +; \
+              find /data   -type d -exec chmod -R 770 {} +; \
+              find /certs  -type d -exec chmod -R 770 {} +; \
+              find /boot   -type f -exec chmod -R 550 {} +; \
+              find /config -type f -exec chmod -R 440 {} +; \
+              find /data   -type f -exec chmod -R 660 {} +; \
+              find /certs  -type f -exec chmod -R 660 {} +; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /boot -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find /config -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find /data -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find /certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+
+# Finally downgrade to system user
+ONBUILD USER  dubo-dubon-duponey
+
+# Disable weak cryptography in GNUTLS
+ENV           GNUTLS_FORCE_FIPS_MODE=1
 
 ENTRYPOINT    ["/boot/entrypoint.sh"]

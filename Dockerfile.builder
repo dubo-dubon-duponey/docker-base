@@ -7,13 +7,13 @@ ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME                                                                        AS base_for_builder
 
 # Note: these obviously cannot be changed at *runtime* in the runtime image. As soon as something relies on it to build, they are set...
-ENV           XDG_DATA_HOME=/data
-ENV           XDG_CONFIG_HOME=/tmp/config
-ENV           XDG_STATE_HOME=/tmp/state
-ENV           XDG_CACHE_HOME=/tmp/cache
-ENV           XDG_RUNTIME_DIR=/tmp/runtime
-ENV           XDG_DATA_DIRS=/data
-ENV           XDG_CONFIG_DIRS=/config
+ENV           XDG_DATA_HOME=/magnetar/user/data
+ENV           XDG_CONFIG_HOME=/magnetar/user/config
+ENV           XDG_STATE_HOME=/magnetar/state
+ENV           XDG_CACHE_HOME=/magnetar/cache
+ENV           XDG_RUNTIME_DIR=/magnetar/runtime
+ENV           XDG_DATA_DIRS=/magnetar/system/data
+ENV           XDG_CONFIG_DIRS=/magnetar/system/config
 
 #######################
 # Actual "builder" image

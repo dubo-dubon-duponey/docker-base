@@ -121,13 +121,13 @@ RUN           echo "umask 0700" > /etc/profile.d/dbdbdp; \
 
 # $XDG_DATA_HOME defines the base directory relative to which user-specific data files should be stored.
 # If $XDG_DATA_HOME is either not set or empty, a default equal to $HOME/.local/share should be used.
-ENV           XDG_DATA_HOME=/data
+ENV           XDG_DATA_HOME=/magnetar/user/data
 
 ## Main user configuration location (meant to be modified, transient)
 
 # $XDG_CONFIG_HOME defines the base directory relative to which user-specific configuration files should be stored.
 # If $XDG_CONFIG_HOME is either not set or empty, a default equal to $HOME/.config should be used.
-ENV           XDG_CONFIG_HOME=/tmp/config
+ENV           XDG_CONFIG_HOME=/magnetar/user/config
 
 ## Main user state location (meant to be modified, transient)
 
@@ -137,19 +137,19 @@ ENV           XDG_CONFIG_HOME=/tmp/config
 # but that is not important or portable enough to the user that it should be stored in $XDG_DATA_HOME. It may contain:
 # actions history (logs, history, recently used files, …)
 # current state of the application that can be reused on a restart (view, layout, open files, undo history, …)
-ENV           XDG_STATE_HOME=/tmp/state
+ENV           XDG_STATE_HOME=/magnetar/state
 
 ## Main user cache location (meant to be modified, transient)
 
 # $XDG_CACHE_HOME defines the base directory relative to which user-specific non-essential data files should be stored.
 # If $XDG_CACHE_HOME is either not set or empty, a default equal to $HOME/.cache should be used.
-ENV           XDG_CACHE_HOME=/tmp/cache
+ENV           XDG_CACHE_HOME=/magnetar/cache
 
 ## Main user runtime location (meant to be modified, session bound)
 
 # $XDG_RUNTIME_DIR defines the base directory relative to which user-specific non-essential runtime files and other file objects (such as sockets, named pipes, ...) should be stored.
 # The directory MUST be owned by the user, and he MUST be the only one having read and write access to it. Its Unix access mode MUST be 0700.
-ENV           XDG_RUNTIME_DIR=/tmp/runtime
+ENV           XDG_RUNTIME_DIR=/magnetar/runtime
 
 #### Secondary, typically read-only
 
@@ -158,21 +158,21 @@ ENV           XDG_RUNTIME_DIR=/tmp/runtime
 # $XDG_DATA_DIRS defines the preference-ordered set of base directories to search for data files in addition to the $XDG_DATA_HOME base directory.
 # The directories in $XDG_DATA_DIRS should be seperated with a colon ':'.
 # If $XDG_DATA_DIRS is either not set or empty, a value equal to /usr/local/share/:/usr/share/ should be used.
-ENV           XDG_DATA_DIRS=/data
+ENV           XDG_DATA_DIRS=/magnetar/system/data
 
 ## Main config location (fixed, persistent)
 
 # $XDG_CONFIG_DIRS defines the preference-ordered set of base directories to search for configuration files in addition to the $XDG_CONFIG_HOME base directory.
 # The directories in $XDG_CONFIG_DIRS should be seperated with a colon ':'.
 # If $XDG_CONFIG_DIRS is either not set or empty, a value equal to /etc/xdg should be used.
-ENV           XDG_CONFIG_DIRS=/config
+ENV           XDG_CONFIG_DIRS=/magnetar/system/config
 
 # Create a restricted user account (no shell, no home, disabled), and add our folders
 RUN           adduser --system --no-create-home --home /nonexistent --gecos "in dockerfile user" \
                 --uid 2000 \
                 dubo-dubon-duponey; \
               epoch="$(date --date "$BUILD_CREATED" +%s)"; \
-              for i in /boot /certs \
+              for i in /boot \
                   "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME" \
                   "$XDG_RUNTIME_DIR" "$XDG_DATA_DIRS" "$XDG_CONFIG_DIRS"; do \
                 mkdir -p "$i"; \
@@ -200,9 +200,8 @@ ONBUILD COPY  --chown=$BUILD_UID:root runtime  /
 ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
                 usermod -u "$BUILD_UID" dubo-dubon-duponey; \
                 chown -R $BUILD_UID:root /boot; \
-                chown -R $BUILD_UID:root /config; \
-                chown -R $BUILD_UID:root /data; \
-                chown -R $BUILD_UID:root /certs; \
+                chown -R $BUILD_UID:root "$XDG_DATA_DIRS"; \
+                chown -R $BUILD_UID:root "$XDG_CONFIG_DIRS"; \
               }; \
               find /boot   -type d -exec chmod -R 550 {} +; \
               find /config -type d -exec chmod -R 550 {} +; \

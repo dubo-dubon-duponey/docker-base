@@ -204,18 +204,15 @@ ONBUILD RUN   [ "$BUILD_UID" == "2000" ] || { \
                 chown -R $BUILD_UID:root "$XDG_CONFIG_DIRS"; \
               }; \
               find /boot   -type d -exec chmod -R 550 {} +; \
-              find /config -type d -exec chmod -R 550 {} +; \
-              find /data   -type d -exec chmod -R 770 {} +; \
-              find /certs  -type d -exec chmod -R 770 {} +; \
+              find "$XDG_CONFIG_DIRS" -type d -exec chmod -R 550 {} +; \
+              find "$XDG_DATA_DIRS"   -type d -exec chmod -R 770 {} +; \
               find /boot   -type f -exec chmod -R 550 {} +; \
-              find /config -type f -exec chmod -R 440 {} +; \
-              find /data   -type f -exec chmod -R 660 {} +; \
-              find /certs  -type f -exec chmod -R 660 {} +; \
+              find "$XDG_CONFIG_DIRS" -type f -exec chmod -R 440 {} +; \
+              find "$XDG_DATA_DIRS"   -type f -exec chmod -R 660 {} +; \
               epoch="$(date --date "$BUILD_CREATED" +%s)"; \
               find /boot -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /config -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /data -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
-              find /certs -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
+              find "$XDG_CONFIG_DIRS" -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +; \
+              find "$XDG_DATA_DIRS" -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +
 
 # Finally downgrade to system user
 ONBUILD USER  dubo-dubon-duponey

@@ -5,14 +5,14 @@ Provides base images (builder, auditor, golang, node, runtime) used by all our i
 Currently, on linux amd64, arm64:
 
 * `docker.io/dubodubonduponey/base:runtime-latest` and `docker.io/dubodubonduponey/base:runtime-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bookworm (currently `DATE=2024-03-01`)
+  * based on our debootstrapped version of Debian Bookworm (currently `DATE=2025-05-01`)
   * labels
   * ca-certificates copied over
   * ONBUILD instructions to copy over runtime folders
   * user creation
   * entrypoint definition
 * `docker.io/dubodubonduponey/base:builder-latest` and `docker.io/dubodubonduponey/base:builder-$SUITE-$DATE`
-  * based on our debootstrapped version of Debian Bookworm (currently `DATE=2024-03-01`)
+  * based on our debootstrapped version of Debian Bookworm (currently `DATE=2025-05-01`)
   * golang, python, and essential cross compilation dev & build tools
 * `docker.io/dubodubonduponey/base:node-latest` and `docker.io/dubodubonduponey/base:node-$SUITE-$DATE`
   * +nodejs +yarnpkg

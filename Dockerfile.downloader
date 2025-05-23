@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_BUILDER=debian:bookworm-2024-03-01
+ARG           FROM_IMAGE_BUILDER=debian:bookworm-2025-05-01
 
 #######################
 # Downloader is here only to retrieve and validate upstream tarballs
@@ -8,13 +8,13 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                
 
 ARG           BUILD_CREATED="1976-04-14T17:00:00-07:00"
 
-ENV           NODE_VERSION=20.11.1
+ENV           NODE_VERSION=22.16.0
 ENV           YARN_VERSION=1.22.22
 
-ENV           GOLANG_VERSION 1.21.8
-ENV           GOLANG_LINUX_AMD64_SHA512 c22d4623dede427057852ef939e593f6ed86b2a873f1cf7cc76bf52713df1e9df5c6dfde98a3185c633eb51a382118d4fc59dd29fd42a6c15123f93cbb0442ea
-ENV           GOLANG_LINUX_ARM64_SHA512 847bc80817d1e55f39d03a18259826167ef7fda50596427266015c30555f07d2cc799bf1ccca0ed5d3d5126b3c23fa23c1f7e7fb29990206b00407e79140f25f
-ENV           GOLANG_LINUX_ARM_V7_SHA512 b3c2ae224c3f3c2c555fb618a7921188fdf024f33cc7199ec956a9827af6c663b7ada6ef226eb82646dcbdd01e772f3c72569d6560912528c27dbbedb51d3bc7
+ENV           GOLANG_VERSION 1.24.3
+ENV           GOLANG_LINUX_AMD64_SHA512 9a7b9ba6ae7d140a4ab35dd30ed54ff654790bb14641ec6010d005d9c93de22726d6fc1457debfcc7ee808ddcfabe4790ed32b9c6f6bde3fa99d1f25db473e74
+ENV           GOLANG_LINUX_ARM64_SHA512 2f0317517ebad7797f545a28c37239688c88aeaa8682e383ac5e91cd28f641357520ee6e304f011e010da5ce6a8029194a510b0bf8c47ecfc2564c62fb8d65a9
+#ENV           GOLANG_LINUX_ARM_V7_SHA512 cc67be3c52ca4ad4c96a0b0ae2938f755a2c95e99508d2b017e2aa9052a7cc0597448c7f2d07b69d13e19bffcb1d7c4b09dc292fcbb9258d4ed81184c11b0e4c
 
 ENV           FAIL_WHEN_OUTDATED=true
 
@@ -28,7 +28,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.88.1-10+deb12u5 \
+                curl=7.88.1-10+deb12u12 \
                 gnupg=2.2.40-1.1 \
                 dirmngr=2.2.40-1.1 \
                 ca-certificates=20230311

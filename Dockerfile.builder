@@ -1,5 +1,5 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
-ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2024-03-01
+ARG           FROM_IMAGE_RUNTIME=debian:bookworm-2025-05-01
 
 #######################
 # Base
@@ -53,19 +53,19 @@ RUN           --mount=type=secret,uid=100,id=CA \
                 build-essential=12.9 \
                 autoconf=2.71-3 \
                 automake=1:1.16.5-1.3 \
-                libtool=2.4.7-5 \
+                libtool=2.4.7-7~deb12u1 \
   	            pkg-config=1.8.1-1 \
                 jq=1.6-2.1 \
-                curl=7.88.1-10+deb12u5 \
+                curl=7.88.1-10+deb12u12 \
                 ca-certificates=20230311 \
-                git=1:2.39.2-1.1; \
+                git=1:2.39.5-0+deb12u2; \
               for architecture in arm64 amd64; do \
                 apt-get install -qq --no-install-recommends \
                   crossbuild-essential-"$architecture"=12.9 \
                   musl-dev:"$architecture"=1.2.3-1 \
                   musl:"$architecture"=1.2.3-1 \
-                  libc6:"$architecture"=2.36-9+deb12u4 \
-                  libc6-dev:"$architecture"=2.36-9+deb12u4; \
+                  libc6:"$architecture"=2.36-9+deb12u10 \
+                  libc6-dev:"$architecture"=2.36-9+deb12u10; \
               done; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
@@ -80,7 +80,7 @@ RUN           git config --global advice.detachedHead false
 # Now replaced with proper ca-certificates install (which does pull in openssl <- not a problem for build, but keeping the lightweight deviation for runtime)
 # ADD           ./cache/overlay.tar /
 
-ENV           GOLANG_VERSION=1.21.8
+ENV           GOLANG_VERSION 1.24.3
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -164,7 +164,7 @@ FROM          base_for_builder                                                  
 ARG           TARGETPLATFORM
 
 # Add node
-ENV           NODE_VERSION=20.11.1
+ENV           NODE_VERSION=22.16.0
 ENV           YARN_VERSION=1.22.22
 
 ADD           ./cache/$TARGETPLATFORM/node-$NODE_VERSION.tar.gz /opt
@@ -223,7 +223,7 @@ ENV           GOPATH=/build/golang-current/source
 ENV           GOROOT=/build/golang-current/go
 ENV           PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-ENV           GOLANG_VERSION=1.21.8
+ENV           GOLANG_VERSION 1.24.3
 
 ADD           ./cache/$TARGETPLATFORM/golang-$GOLANG_VERSION.tar.gz /build/golang-current
 
@@ -263,9 +263,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                curl=7.88.1-10+deb12u5 \
+                curl=7.88.1-10+deb12u12 \
                 ca-certificates=20230311 \
-                git=1:2.39.2-1.1; \
+                git=1:2.39.5-0+deb12u2; \
               apt-get -qq autoremove; \
               apt-get -qq clean; \
               rm -rf /var/lib/apt/lists/*; \
